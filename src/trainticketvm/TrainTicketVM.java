@@ -20,6 +20,7 @@ public class TrainTicketVM {
       displayCurrentStation();
       landingPage();
     }
+    System.out.println("Thank you for using the Program!");
   }
 
   private static void landingPage() {
