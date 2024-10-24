@@ -7,24 +7,44 @@ import java.sql.*;
 public class Ticket {
 
   private SysConnectMySQL dbConnect = new SysConnectMySQL();
-  private int ticketID;
+  private String ticketID;
   private String ticketType;
   private Date issueDate;
   private Date expiryDate;
+  private int departureID;
+  private int destinationID;
 
-  public Ticket(int ticketID, String ticketType, String issueDateStr, String expiryDateStr) throws Exception {
-    this.ticketID = ticketID;
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    this.issueDate = sdf.parse(issueDateStr);
-    this.expiryDate = sdf.parse(expiryDateStr);
+  public Ticket(String ticketType, Date issueDate, Date expiryDate, int departureID, int destinationID) {
     this.ticketType = ticketType;
+    this.issueDate = issueDate;
+    this.expiryDate = expiryDate;
+    this.departureID = departureID;
+    this.destinationID = destinationID;
   }
   
-  public int getTicketID() {
+
+  public void insertTicket() {
+    dbConnect.connectToMachineDatabase();
+    String query = "INSERT INTO tickets (ticketType, issueDate, expiryDate, departureID, destinationID) VALUES(?, ?, ?, ?, ?)";
+    try (Connection con = dbConnect.con;
+            PreparedStatement prep = con.prepareStatement(query)) {
+      prep.setString(1, ticketType);
+      prep.setDate(2, new java.sql.Date(issueDate.getTime()));
+      prep.setDate(3, new java.sql.Date(expiryDate.getTime()));
+      prep.setInt(4, departureID);
+      prep.setInt(5, destinationID);
+      prep.executeUpdate();
+    } catch (Exception e) {
+      System.out.println("Something went wrong with inserting ticket into database!");
+      e.printStackTrace();
+    }
+  }
+
+  public String getTicketID() {
     return ticketID;
   }
 
-  public void setTicketID(int ticketID) {
+  public void setTicketID(String ticketID) {
     this.ticketID = ticketID;
   }
 
