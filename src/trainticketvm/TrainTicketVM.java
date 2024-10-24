@@ -9,6 +9,7 @@ public class TrainTicketVM {
   private static SysConnectMySQL dbconnection = new SysConnectMySQL();
   private static boolean mainLoop = true;
   private static final int CURRENT_STATION = 19;
+  private static final String TRAIN_ROUTE = "NORTHBOUND"; // NORTHBOUND OR SOUTHBOUND
   private static final double BASE_PRICE = 15.00;
   
   public static void main(String[] args) {
@@ -68,7 +69,8 @@ public class TrainTicketVM {
 
   private static void displayStations() {
     dbconnection.connectToMachineDatabase();
-    String query = "SELECT * FROM stations";
+    char route = (TRAIN_ROUTE.equalsIgnoreCase("NORTHBOUND")) ? '>' : '<';
+    String query = "SELECT * FROM stations WHERE stationID " + route + " 19";
 
     try (Connection con = dbconnection.con;
             PreparedStatement prep = con.prepareStatement(query)) {
@@ -88,12 +90,11 @@ public class TrainTicketVM {
 
   private static void buyTicket() {
     scanner.nextLine();
-    displayStations();
-    displayCurrentStation();
     
     System.out.print("Enter Ticket Type : ");
     String ticketType = scanner.nextLine();
-    
+    displayStations();
+    displayCurrentStation();
     System.out.print("Enter Destination : ");
     int destination = scanner.nextInt();
 
