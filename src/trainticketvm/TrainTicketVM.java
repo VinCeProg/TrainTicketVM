@@ -13,7 +13,7 @@ public class TrainTicketVM {
   private static final int CURRENT_STATION = 17;
   private static final String TRAIN_ROUTE = "SOUTHBOUND"; // NORTHBOUND OR SOUTHBOUND
   private static final double BASE_PRICE = 15.00;
-  
+
   public static void main(String[] args) {
 
     while (mainLoop) {
@@ -70,16 +70,25 @@ public class TrainTicketVM {
     }
   }
 
-  private static void displayStations() {
+  private static void displayStations(String ticketType) {
     dbconnection.connectToMachineDatabase();
+    String selectedTrain = "";
+    if (ticketType.equalsIgnoreCase("COMMUTER")) {
+      selectedTrain = "onRoute_Commuter";
+    } else if (ticketType.equalsIgnoreCase("COMMUTERX")) {
+      selectedTrain = "onRoute_CommuterX";
+    } else if (ticketType.equalsIgnoreCase("LIMITED")) {
+      selectedTrain = "onRoute_Limited";
+    }
+
     char route = (TRAIN_ROUTE.equalsIgnoreCase("NORTHBOUND")) ? '>' : '<';
-    String query = "SELECT * FROM stations WHERE stationID " + route + " " + CURRENT_STATION;
+    String query = "SELECT * FROM stations WHERE stationID " + route + " " + CURRENT_STATION + " AND " + selectedTrain + " = true";
 
     try (Connection con = dbconnection.con;
             PreparedStatement prep = con.prepareStatement(query)) {
       ResultSet result = prep.executeQuery();
       System.out.println("Station ID \t Station Name");
-      while(result.next()){
+      while (result.next()) {
         int stationID = result.getInt("stationID");
         String stationName = result.getString("stationName");
         System.out.println(stationID + "\t\t " + stationName);
@@ -93,26 +102,36 @@ public class TrainTicketVM {
 
   private static void buyTicket() {
     scanner.nextLine(); // resets scanner from int to string
-    
-    System.out.print("Enter Ticket Type : ");
-    String ticketType = scanner.nextLine();
-    
+    String ticketType = "";
+    while (true) {
+      System.out.print("Enter Ticket Type (COMMUTER, COMMUTERX, LIMITED): ");
+      ticketType = scanner.nextLine().toUpperCase();
+
+      if (ticketType.equals("COMMUTER")
+              || ticketType.equals("COMMUTERX")
+              || ticketType.equals("LIMITED")) {
+        break;
+      } else {
+        System.out.println("Invalid input! Please enter a valid ticket type.");
+      }
+    }
+
     // Generate issue and expiryDate
     Date issueDate = new Date();
     Calendar cal = Calendar.getInstance();
     cal.setTime(issueDate);
     cal.add(Calendar.DATE, 14); // sets ticket validity for 14 days
     Date expiryDate = cal.getTime();
-    
-    displayStations();
+
+    displayStations(ticketType);
     displayCurrentStation();
     System.out.print("Enter Destination : ");
     int destination = scanner.nextInt();
-    
+
     // Creates Ticket Object
     Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, CURRENT_STATION, destination);
     ticket.insertTicket();
-    
+
     System.out.print("The Price for the ticket is ");
     System.out.printf("%.2f\n", BASE_PRICE + Math.abs(destination - CURRENT_STATION));
   }
