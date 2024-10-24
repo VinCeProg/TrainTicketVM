@@ -21,7 +21,6 @@ public class Ticket {
     this.departureID = departureID;
     this.destinationID = destinationID;
   }
-  
 
   public void insertTicket() {
     dbConnect.connectToMachineDatabase();
@@ -38,6 +37,14 @@ public class Ticket {
       System.out.println("Something went wrong with inserting ticket into database!");
       e.printStackTrace();
     }
+  }
+
+  private static void displayTicket() {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
+
+  private static void dispenseTicket() {
+    throw new UnsupportedOperationException("Not supported yet.");
   }
 
   public String getTicketID() {
