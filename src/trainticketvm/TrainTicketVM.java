@@ -11,7 +11,7 @@ public class TrainTicketVM {
   private static final int CURRENT_STATION = 19;
 
   public static void main(String[] args) {
-    
+
     while (mainLoop) {
       displayCurrentStation();
       landingPage();
@@ -29,10 +29,11 @@ public class TrainTicketVM {
 
     switch (choice) {
       case 1: // Buy Ticket
+        buyTicket();
         System.out.println("Ticket Sold!\n\n");
         break;
       case 2: // Check Ticket Validity
-        System.out.println("Ticket Valid!");
+        System.out.println("Ticket Valid!\n\n");
         break;
       case 3: // exit NOTE: this will be transferred in Admin Access later
         mainLoop = false;
@@ -41,8 +42,8 @@ public class TrainTicketVM {
 
         break;
       default:
-
-        break;
+        System.out.println("Invalid input!");
+        return;
     }//switch
   }
 
@@ -59,8 +60,40 @@ public class TrainTicketVM {
       }
 
     } catch (Exception e) {
-      System.out.println("Oh No! Something went Wrong!");
+      System.out.println("Something went wrong with displaying Current Station");
       e.printStackTrace();
     }
+  }
+
+  private static void displayStations() {
+    dbconnection.connectToMachineDatabase();
+    String query = "SELECT * FROM stations";
+
+    try (Connection con = dbconnection.con;
+            PreparedStatement prep = con.prepareStatement(query)) {
+      ResultSet result = prep.executeQuery();
+      System.out.println("Station ID \t Station Name");
+      while(result.next()){
+        int stationID = result.getInt("stationID");
+        String stationName = result.getString("stationName");
+        System.out.println(stationID + "\t\t " + stationName);
+      }
+
+    } catch (Exception e) {
+      System.out.println("Something went wrong with displaying Stations");
+      e.printStackTrace();
+    }
+  }
+
+  private static void buyTicket() {
+    scanner.nextLine();
+    displayStations();
+    displayCurrentStation();
+    
+    System.out.print("Enter Destination : ");
+    String destination = scanner.nextLine();
+
+    System.out.print("Enter Ticket Type : ");
+    String ticketType = scanner.nextLine();
   }
 }
