@@ -2,14 +2,16 @@ package trainticketvm;
 
 import java.util.Scanner;
 import java.sql.*;
+import java.util.Date;
+import java.util.Calendar;
 
 public class TrainTicketVM {
 
   private static Scanner scanner = new Scanner(System.in);
   private static SysConnectMySQL dbconnection = new SysConnectMySQL();
   private static boolean mainLoop = true;
-  private static final int CURRENT_STATION = 19;
-  private static final String TRAIN_ROUTE = "NORTHBOUND"; // NORTHBOUND OR SOUTHBOUND
+  private static final int CURRENT_STATION = 17;
+  private static final String TRAIN_ROUTE = "SOUTHBOUND"; // NORTHBOUND OR SOUTHBOUND
   private static final double BASE_PRICE = 15.00;
   
   public static void main(String[] args) {
@@ -70,7 +72,7 @@ public class TrainTicketVM {
   private static void displayStations() {
     dbconnection.connectToMachineDatabase();
     char route = (TRAIN_ROUTE.equalsIgnoreCase("NORTHBOUND")) ? '>' : '<';
-    String query = "SELECT * FROM stations WHERE stationID " + route + " 19";
+    String query = "SELECT * FROM stations WHERE stationID " + route + " " + CURRENT_STATION;
 
     try (Connection con = dbconnection.con;
             PreparedStatement prep = con.prepareStatement(query)) {
@@ -89,15 +91,27 @@ public class TrainTicketVM {
   }
 
   private static void buyTicket() {
-    scanner.nextLine();
+    scanner.nextLine(); // resets scanner from int to string
     
     System.out.print("Enter Ticket Type : ");
     String ticketType = scanner.nextLine();
+    
+    // Generate issue and expiryDate
+    Date issueDate = new Date();
+    Calendar cal = Calendar.getInstance();
+    cal.setTime(issueDate);
+    cal.add(Calendar.DATE, 14); // sets ticket validity for 14 days
+    Date expiryDate = cal.getTime();
+    
     displayStations();
     displayCurrentStation();
     System.out.print("Enter Destination : ");
     int destination = scanner.nextInt();
-
+    
+    // Creates Ticket Object
+    Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, CURRENT_STATION, destination);
+    ticket.insertTicket();
+    
     System.out.print("The Price for the ticket is ");
     System.out.printf("%.2f\n", BASE_PRICE + Math.abs(destination - CURRENT_STATION));
   }
