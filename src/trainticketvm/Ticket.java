@@ -19,21 +19,6 @@ public class Ticket {
     this.expiryDate = sdf.parse(expiryDateStr);
     this.ticketType = ticketType;
   }
-
-  public void saveToDatabase() {
-    String query = "INSERT INTO Tickets (ticketID,ticketType, issueDate, expiryDate) VALUES (?, ?, ?, ?)";
-    try (Connection con = SysConnectMySQL.getConnection();
-            PreparedStatement pst = con.prepareStatement(query)) {
-      pst.setInt(1, ticketID);
-      pst.setString(2, ticketType);
-      pst.setDate(3, new java.sql.Date(issueDate.getTime()));
-      pst.setDate(4, new java.sql.Date(expiryDate.getTime()));
-      pst.executeUpdate();
-    } catch (SQLException ex) {
-      System.out.println("Oh Naur! Something went wrong!");
-      ex.printStackTrace();
-    }
-  }
   
   public int getTicketID() {
     return ticketID;
