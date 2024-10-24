@@ -9,7 +9,8 @@ public class TrainTicketVM {
   private static SysConnectMySQL dbconnection = new SysConnectMySQL();
   private static boolean mainLoop = true;
   private static final int CURRENT_STATION = 19;
-
+  private static final double BASE_PRICE = 15.00;
+  
   public static void main(String[] args) {
 
     while (mainLoop) {
@@ -90,10 +91,13 @@ public class TrainTicketVM {
     displayStations();
     displayCurrentStation();
     
-    System.out.print("Enter Destination : ");
-    String destination = scanner.nextLine();
-
     System.out.print("Enter Ticket Type : ");
     String ticketType = scanner.nextLine();
+    
+    System.out.print("Enter Destination : ");
+    int destination = scanner.nextInt();
+
+    System.out.print("The Price for the ticket is ");
+    System.out.printf("%.2f\n", BASE_PRICE + Math.abs(destination - CURRENT_STATION));
   }
 }
