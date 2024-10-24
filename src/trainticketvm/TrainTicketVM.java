@@ -44,4 +44,8 @@ public class TrainTicketVM {
         break;
     }//switch
   }
+  
+  public static void buyTicket(){
+  
+}
 }
