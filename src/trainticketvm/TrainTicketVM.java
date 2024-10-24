@@ -8,7 +8,7 @@ public class TrainTicketVM {
   private static Scanner scanner = new Scanner(System.in);
   private static SysConnectMySQL dbconnection = new SysConnectMySQL();
   private static boolean mainLoop = true;
-  private static final int CURRENT_STATION = 11;
+  private static final int CURRENT_STATION = 19;
 
   public static void main(String[] args) {
     
@@ -24,10 +24,6 @@ public class TrainTicketVM {
     System.out.println("1 - Buy Ticket/s");
     System.out.println("2 - Check Ticket Validity");
     System.out.println("3 - Exit");
-    selectOptionLP();
-  }
-
-  private static void selectOptionLP() {
     System.out.print("Choice : ");
     int choice = scanner.nextInt();
 
