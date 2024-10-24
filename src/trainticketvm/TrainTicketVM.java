@@ -8,6 +8,7 @@ public class TrainTicketVM {
   private static boolean mainLoop = true;
   
   public static void main(String[] args) {
+    
     while(mainLoop){
       landingPage();
     }
@@ -46,6 +47,6 @@ public class TrainTicketVM {
   }
   
   public static void buyTicket(){
-  
-}
+    
+  }
 }
