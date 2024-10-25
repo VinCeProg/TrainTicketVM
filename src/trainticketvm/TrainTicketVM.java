@@ -16,6 +16,7 @@ public class TrainTicketVM {
   private static final int CURRENT_STATION = 1;
   private static final String TRAIN_ROUTE = "NORTHBOUND"; // NORTHBOUND OR SOUTHBOUND
   private static final double BASE_PRICE = 15.00;
+  private static final int TICKET_VALIDITY = 1;
 
   public static void main(String[] args) {
 
@@ -122,7 +123,7 @@ public class TrainTicketVM {
     Date issueDate = new Date();
     Calendar cal = Calendar.getInstance();
     cal.setTime(issueDate);
-    cal.add(Calendar.DATE, 3); // sets ticket validity for 14 days
+    cal.add(Calendar.DATE, TICKET_VALIDITY); // sets ticket validity for 14 days
     Date expiryDate = cal.getTime();
 
     // Displays stations and prompts user
@@ -151,12 +152,14 @@ public class TrainTicketVM {
     double ticketAmount = BASE_PRICE + Math.abs(destination - CURRENT_STATION) * tixType;
     System.out.print("The Price for the ticket is ");
     System.out.printf(formatAmt, ticketAmount);
-    
+
     // Payment
-    
-    
-    // Creates Ticket Object
-    Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, CURRENT_STATION, destination);
-    ticket.insertTicket();
+    Payment payment = new Payment();
+    if (payment.makeCashPayment(ticketAmount)) {
+      Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, CURRENT_STATION, destination);
+      ticket.insertTicket();
+    }else{
+      System.out.println("Transaction Cancelled!");
+    }
   }
 }
