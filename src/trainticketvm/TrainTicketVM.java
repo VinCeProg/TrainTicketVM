@@ -10,8 +10,11 @@ public class TrainTicketVM {
   private static Scanner scanner = new Scanner(System.in);
   private static SysConnectMySQL dbconnection = new SysConnectMySQL();
   private static boolean mainLoop = true;
-  private static final int CURRENT_STATION = 17;
-  private static final String TRAIN_ROUTE = "SOUTHBOUND"; // NORTHBOUND OR SOUTHBOUND
+  private static String formatAmt = "%.2f";
+
+  // CHANGE THIS VALUE FOR TESTING
+  private static final int CURRENT_STATION = 1;
+  private static final String TRAIN_ROUTE = "NORTHBOUND"; // NORTHBOUND OR SOUTHBOUND
   private static final double BASE_PRICE = 15.00;
 
   public static void main(String[] args) {
@@ -20,7 +23,7 @@ public class TrainTicketVM {
       displayCurrentStation();
       landingPage();
     }
-    System.out.println("Thank you for using the Program!");
+    System.out.println("Powering OFF!");
   }
 
   private static void landingPage() {
@@ -28,26 +31,25 @@ public class TrainTicketVM {
     System.out.println("Select Options:");
     System.out.println("1 - Buy Ticket/s");
     System.out.println("2 - Check Ticket Validity");
-    System.out.println("3 - Exit");
     System.out.print("Choice : ");
     int choice = scanner.nextInt();
 
     switch (choice) {
+      case 0: // exit NOTE: this will be transferred in Admin Access later
+        mainLoop = false;
+        break;
       case 1: // Buy Ticket
         buyTicket();
-        System.out.println("Ticket Sold!\n\n");
+        System.out.println("\n");
         break;
       case 2: // Check Ticket Validity
         System.out.println("Ticket Valid!\n\n");
-        break;
-      case 3: // exit NOTE: this will be transferred in Admin Access later
-        mainLoop = false;
         break;
       case 4: // Admin Access to Program
 
         break;
       default:
-        System.out.println("Invalid input!");
+        System.out.println("Invalid input! Please select options between 1 and 2!");
         return;
     }//switch
   }
@@ -120,19 +122,41 @@ public class TrainTicketVM {
     Date issueDate = new Date();
     Calendar cal = Calendar.getInstance();
     cal.setTime(issueDate);
-    cal.add(Calendar.DATE, 14); // sets ticket validity for 14 days
+    cal.add(Calendar.DATE, 3); // sets ticket validity for 14 days
     Date expiryDate = cal.getTime();
 
+    // Displays stations and prompts user
     displayStations(ticketType);
     displayCurrentStation();
-    System.out.print("Enter Destination : ");
-    int destination = scanner.nextInt();
+    int destination = 0;
+    while (true) {
+      System.out.print("Enter Destination : ");
+      if (scanner.hasNextInt()) {
+        destination = scanner.nextInt();
+        if ((TRAIN_ROUTE.equalsIgnoreCase("NORTHBOUND") && destination > CURRENT_STATION)
+                || (TRAIN_ROUTE.equalsIgnoreCase("SOUTHBOUND") && destination < CURRENT_STATION && destination > 0)) {
+          break;
+        } else {
+          System.out.println("Invalid Destination!");
+        }
+      } else {
+        System.out.println("Invalid Input! Please enter a valid number.");
+        scanner.next(); // Clear the invalid input
+      }
+    }
 
+    // Calculate ticket amount
+    double tixType = (ticketType.equalsIgnoreCase("LIMITED")) ? 1.75
+            : (ticketType.equalsIgnoreCase("COMMUTERX")) ? 1.50 : 1.00;
+    double ticketAmount = BASE_PRICE + Math.abs(destination - CURRENT_STATION) * tixType;
+    System.out.print("The Price for the ticket is ");
+    System.out.printf(formatAmt, ticketAmount);
+    
+    // Payment
+    
+    
     // Creates Ticket Object
     Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, CURRENT_STATION, destination);
     ticket.insertTicket();
-
-    System.out.print("The Price for the ticket is ");
-    System.out.printf("%.2f\n", BASE_PRICE + Math.abs(destination - CURRENT_STATION));
   }
 }
