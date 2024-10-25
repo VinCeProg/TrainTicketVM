@@ -1,7 +1,6 @@
 package trainticketvm;
 
 import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.sql.*;
 
 public class Ticket {
