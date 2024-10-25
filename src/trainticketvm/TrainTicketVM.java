@@ -152,14 +152,35 @@ public class TrainTicketVM {
     double ticketAmount = BASE_PRICE + Math.abs(destination - CURRENT_STATION) * tixType;
     System.out.print("The Price for the ticket is ");
     System.out.printf(formatAmt, ticketAmount);
+    System.out.println();
 
     // Payment
+    boolean paymentSuccessful = false;
     Payment payment = new Payment();
-    if (payment.makeCashPayment(ticketAmount)) {
-      Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, CURRENT_STATION, destination);
-      ticket.insertTicket();
-    }else{
-      System.out.println("Transaction Cancelled!");
+    String paymentMethod = "";
+    
+    while (true) {
+      System.out.print("Choose payment method (CASH, CARD, or MOBILE): ");
+      paymentMethod = scanner.next().toUpperCase();
+
+      switch (paymentMethod) {
+        case "CASH":
+          paymentSuccessful = payment.makeCashPayment(ticketAmount);
+          break;
+        case "CARD":
+        case "MOBILE":
+          paymentSuccessful = payment.makeCashlessPayment(ticketAmount, paymentMethod);
+          break;
+        default:
+          System.out.println("Invalid Payment Method!");
+          continue;
+      }
+      break;
+    }
+    
+    // if payment is successful, ticket is generated and uploaded to database
+    if (paymentSuccessful) {
+      Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, CURRENT_STATION, destination, ticketAmount, paymentMethod);
     }
   }
 }
