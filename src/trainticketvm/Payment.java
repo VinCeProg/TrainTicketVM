@@ -47,4 +47,9 @@ public class Payment {
             || cashCoin == 20 || cashCoin == 50 || cashCoin == 100 || cashCoin == 200
             || cashCoin == 500 || cashCoin == 1000);
   }
+  
+  public boolean makeCashlessPayment(double amount, String method){
+    
+    return true;
+  }
 }
