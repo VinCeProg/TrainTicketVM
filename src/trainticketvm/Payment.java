@@ -4,7 +4,7 @@ import java.util.Scanner;
 import java.util.InputMismatchException;
 
 public class Payment {
-
+  
   public boolean makeCashPayment(double amount) {
 
     Scanner scanner = new Scanner(System.in);
@@ -47,9 +47,26 @@ public class Payment {
             || cashCoin == 20 || cashCoin == 50 || cashCoin == 100 || cashCoin == 200
             || cashCoin == 500 || cashCoin == 1000);
   }
-  
-  public boolean makeCashlessPayment(double amount, String method){
-    
-    return true;
+
+  public boolean makeCashlessPayment(double amount, String method) {
+    System.out.printf("Processing %s payment for amount:  %.2f\n", method, amount);
+    if (processCashlessPayment(amount)) {
+      System.out.println("Payment Successful. Thank you!");
+      return true;
+    } else {
+      System.out.println("Payment Failed. Please try again.");
+      return false;
+    }
+
+  }
+
+  private boolean processCashlessPayment(double amount) {
+    try {
+      Thread.sleep(2000); // Simulate payment processing delay
+      return Math.random() * 100 < 97;
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+      return false;
+    }
   }
 }
