@@ -12,18 +12,23 @@ public class Ticket {
   private Date expiryDate;
   private int departureID;
   private int destinationID;
-
-  public Ticket(String ticketType, Date issueDate, Date expiryDate, int departureID, int destinationID) {
+  private double amount;
+  private String paymentMethod;
+  
+  public Ticket(String ticketType, Date issueDate, Date expiryDate, int departureID, int destinationID, double amount, String paymentMethod) {
     this.ticketType = ticketType;
     this.issueDate = issueDate;
     this.expiryDate = expiryDate;
     this.departureID = departureID;
     this.destinationID = destinationID;
+    this.amount = amount;
+    this.paymentMethod = paymentMethod;
+    insertTicket();
   }
 
   public void insertTicket() {
     dbConnect.connectToMachineDatabase();
-    String query = "INSERT INTO tickets (ticketType, issueDate, expiryDate, departureID, destinationID) VALUES(?, ?, ?, ?, ?)";
+    String query = "INSERT INTO tickets (ticketType, issueDate, expiryDate, departureID, destinationID, amount, paymentMethod) VALUES(?, ?, ?, ?, ?, ?, ?)";
     try (Connection con = dbConnect.con;
             PreparedStatement prep = con.prepareStatement(query)) {
       prep.setString(1, ticketType);
@@ -31,6 +36,8 @@ public class Ticket {
       prep.setDate(3, new java.sql.Date(expiryDate.getTime()));
       prep.setInt(4, departureID);
       prep.setInt(5, destinationID);
+      prep.setDouble(6, amount);
+      prep.setString(7, paymentMethod);
       prep.executeUpdate();
     } catch (Exception e) {
       System.out.println("Something went wrong with inserting ticket into database!");
@@ -38,11 +45,7 @@ public class Ticket {
     }
   }
 
-  private static void displayTicket() {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  private static void dispenseTicket() {
+  private void displayTicket() {
     throw new UnsupportedOperationException("Not supported yet.");
   }
 
