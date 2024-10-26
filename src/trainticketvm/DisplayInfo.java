@@ -1,12 +1,9 @@
 package trainticketvm;
 
-import java.util.Scanner;
 import java.sql.*;
-import java.util.Date;
-import java.util.Calendar;
 
 public abstract class DisplayInfo {
-  
+
   private static SysConnectMySQL dbconnection = new SysConnectMySQL();
 
   public static void displayStations(String ticketType) {
@@ -19,7 +16,7 @@ public abstract class DisplayInfo {
     } else if (ticketType.equalsIgnoreCase("LIMITED")) {
       selectedTrain = "onRoute_Limited";
     }
-
+    // query to be passed onto database
     String query = "SELECT * FROM stations WHERE " + selectedTrain + " = true";
 
     try (Connection con = dbconnection.con;
@@ -37,8 +34,8 @@ public abstract class DisplayInfo {
       e.printStackTrace();
     }
   }
-  
-  public static void displayStations(String ticketType, int departureStation){
+
+  public static void displayStations(String ticketType, int departureStation) {
     dbconnection.connectToMachineDatabase();
     String selectedTrain = "";
     if (ticketType.equalsIgnoreCase("COMMUTER")) {
