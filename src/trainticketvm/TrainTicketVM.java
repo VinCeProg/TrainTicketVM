@@ -13,15 +13,12 @@ public class TrainTicketVM {
   private static String formatAmt = "%.2f";
 
   // CHANGE THIS VALUE FOR TESTING
-  private static final int CURRENT_STATION = 1;
-  private static final String TRAIN_ROUTE = "NORTHBOUND"; // NORTHBOUND OR SOUTHBOUND
   private static final double BASE_PRICE = 15.00;
   private static final int TICKET_VALIDITY = 1;
 
   public static void main(String[] args) {
 
     while (mainLoop) {
-      displayCurrentStation();
       landingPage();
     }
     System.out.println("Powering OFF!");
@@ -55,57 +52,13 @@ public class TrainTicketVM {
     }//switch
   }
 
-  private static void displayCurrentStation() {
-    dbconnection.connectToMachineDatabase();
-    String query = "SELECT * FROM stations WHERE stationID = " + CURRENT_STATION;
-
-    try (Connection con = dbconnection.con;
-            PreparedStatement prep = con.prepareStatement(query)) {
-      ResultSet result = prep.executeQuery();
-      if (result.next()) {
-        String stationName = result.getString("stationName");
-        System.out.println("Current Station: " + stationName);
-      }
-
-    } catch (Exception e) {
-      System.out.println("Something went wrong with displaying Current Station");
-      e.printStackTrace();
-    }
-  }
-
-  private static void displayStations(String ticketType) {
-    dbconnection.connectToMachineDatabase();
-    String selectedTrain = "";
-    if (ticketType.equalsIgnoreCase("COMMUTER")) {
-      selectedTrain = "onRoute_Commuter";
-    } else if (ticketType.equalsIgnoreCase("COMMUTERX")) {
-      selectedTrain = "onRoute_CommuterX";
-    } else if (ticketType.equalsIgnoreCase("LIMITED")) {
-      selectedTrain = "onRoute_Limited";
-    }
-
-    char route = (TRAIN_ROUTE.equalsIgnoreCase("NORTHBOUND")) ? '>' : '<';
-    String query = "SELECT * FROM stations WHERE stationID " + route + " " + CURRENT_STATION + " AND " + selectedTrain + " = true";
-
-    try (Connection con = dbconnection.con;
-            PreparedStatement prep = con.prepareStatement(query)) {
-      ResultSet result = prep.executeQuery();
-      System.out.println("Station ID \t Station Name");
-      while (result.next()) {
-        int stationID = result.getInt("stationID");
-        String stationName = result.getString("stationName");
-        System.out.println(stationID + "\t\t " + stationName);
-      }
-
-    } catch (Exception e) {
-      System.out.println("Something went wrong with displaying Stations");
-      e.printStackTrace();
-    }
-  }
-
   private static void buyTicket() {
     scanner.nextLine(); // resets scanner from int to string
     String ticketType = "";
+    int departure = 0;
+    int destination = 0;
+
+    // Asks the user to choose ticket Type
     while (true) {
       System.out.print("Enter Ticket Type (COMMUTER, COMMUTERX, LIMITED): ");
       ticketType = scanner.nextLine().toUpperCase();
@@ -123,33 +76,46 @@ public class TrainTicketVM {
     Date issueDate = new Date();
     Calendar cal = Calendar.getInstance();
     cal.setTime(issueDate);
-    cal.add(Calendar.DATE, TICKET_VALIDITY); // sets ticket validity for 14 days
+    cal.add(Calendar.DATE, TICKET_VALIDITY);
     Date expiryDate = cal.getTime();
 
-    // Displays stations and prompts user
-    displayStations(ticketType);
-    displayCurrentStation();
-    int destination = 0;
+    // Prompts the user to choose departure and destination
     while (true) {
-      System.out.print("Enter Destination : ");
+      DisplayInfo.displayStations(ticketType);
+      System.out.print("Enter Departure Station : ");
       if (scanner.hasNextInt()) {
-        destination = scanner.nextInt();
-        if ((TRAIN_ROUTE.equalsIgnoreCase("NORTHBOUND") && destination > CURRENT_STATION)
-                || (TRAIN_ROUTE.equalsIgnoreCase("SOUTHBOUND") && destination < CURRENT_STATION && destination > 0)) {
+        departure = scanner.nextInt();
+        if (departure >= 1 && departure <= 41) {
           break;
         } else {
-          System.out.println("Invalid Destination!");
+          System.out.println("Invalid Departure Station!");
         }
       } else {
-        System.out.println("Invalid Input! Please enter a valid number.");
-        scanner.next(); // Clear the invalid input
+        System.out.println("Invalid Input! Please enter a valid number!");
+        scanner.nextLine();
+      }
+    }
+
+    while (true) {
+      DisplayInfo.displayStations(ticketType, departure);
+      System.out.print("Enter Destination Station : ");
+      if (scanner.hasNextInt()) {
+        destination = scanner.nextInt();
+        if (destination == departure || !(destination >= 1 || destination <= 41)) {
+          System.out.println("Invalid Input! Please enter a valid number!");
+        } else {
+          break;
+        }
+      } else {
+        System.out.println("Invalid Input! Please enter a valid number!");
+        scanner.nextLine();
       }
     }
 
     // Calculate ticket amount
     double tixType = (ticketType.equalsIgnoreCase("LIMITED")) ? 1.75
             : (ticketType.equalsIgnoreCase("COMMUTERX")) ? 1.50 : 1.00;
-    double ticketAmount = BASE_PRICE + Math.abs(destination - CURRENT_STATION) * tixType;
+    double ticketAmount = BASE_PRICE + Math.abs(destination - departure) * tixType;
     System.out.print("The Price for the ticket is ");
     System.out.printf(formatAmt, ticketAmount);
     System.out.println();
@@ -158,7 +124,7 @@ public class TrainTicketVM {
     boolean paymentSuccessful = false;
     Payment payment = new Payment();
     String paymentMethod = "";
-    
+
     while (true) {
       System.out.print("Choose payment method (CASH, CARD, or MOBILE): ");
       paymentMethod = scanner.next().toUpperCase();
@@ -177,10 +143,10 @@ public class TrainTicketVM {
       }
       break;
     }
-    
+
     // if payment is successful, ticket is generated and uploaded to database
     if (paymentSuccessful) {
-      Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, CURRENT_STATION, destination, ticketAmount, paymentMethod);
+      Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
     }
   }
 }
