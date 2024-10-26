@@ -2,20 +2,22 @@ package trainticketvm;
 
 import java.util.Scanner;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Calendar;
 
 public class TrainTicketVM {
 
   private static Scanner scanner = new Scanner(System.in);
-  private static SysConnectMySQL dbconnection = new SysConnectMySQL();
+  private static SysConnectMySQL dbConnect = new SysConnectMySQL();
   private static boolean mainLoop = true;
   private static String formatAmt = "%.2f";
 
   // CHANGE THIS VALUE FOR TESTING
   private static final double BASE_PRICE = 15.00;
   private static final int TICKET_VALIDITY = 1;
-  
+
   // MAIN
   public static void main(String[] args) {
 
@@ -27,15 +29,15 @@ public class TrainTicketVM {
 
   private static void landingPage() {
     int choice = -1;
-    
+
     System.out.println("Train Ticket Vending Machine\n");
     System.out.println("Select Options:");
     System.out.println("1 - Buy Ticket/s");
     System.out.println("2 - Check Ticket Validity");
     System.out.print("Choice : ");
-    if(scanner.hasNextInt()){
+    if (scanner.hasNextInt()) {
       choice = scanner.nextInt();
-    }else{
+    } else {
       System.out.println("Please enter a valid Input!");
       scanner.nextLine();
     }
@@ -49,7 +51,7 @@ public class TrainTicketVM {
         System.out.println("\n");
         break;
       case 2: // Check Ticket Validity
-        System.out.println("Ticket Valid!\n\n");
+        validateTicket();
         break;
       default:
         System.out.println("Invalid input! Please select options between 1 and 2!");
@@ -153,8 +155,60 @@ public class TrainTicketVM {
     if (paymentSuccessful) {
       Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
     }
-    
+
     System.out.println();
     System.out.println("Thank You & have a safe trip!");
+  }
+
+  public static void validateTicket() {
+
+    int ticketNum = 0;
+
+    while (true) {
+      System.out.print("Enter Ticket Number : ");
+      if (scanner.hasNextInt()) {
+        ticketNum = scanner.nextInt();
+        if (ticketNum <= 12340000) {
+          System.out.println("Invalid Ticket Number! Please enter your ticket number correctly!");
+        } else {
+          break;
+        }
+      } else {
+        System.out.println("Invalid Ticket Number! Please enter a valid ticket number!");
+        scanner.nextLine();
+      }
+    }
+
+    dbConnect.connectToMachineDatabase();
+    String query = "SELECT * FROM tickets WHERE ticketID = ?;";
+    try (Connection con = dbConnect.con;
+            PreparedStatement prep = con.prepareStatement(query)) {
+      prep.setInt(1, ticketNum);
+      ResultSet result = prep.executeQuery();
+      if (result.next()) {
+        System.out.println();
+        System.out.println("********** Ticket **********");
+        System.out.println("Ticket ID No  :  " + result.getInt("ticketID"));
+        System.out.println("Issue Date    :  " + result.getString("issueDate"));
+        System.out.println("Expiry Date   :  " + result.getString("expiryDate"));
+        System.out.println("****************************");
+
+        // Check if the ticket is valid
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate expiryDate = LocalDate.parse(result.getString("expiryDate"), formatter);
+
+        if (today.isBefore(expiryDate) || today.isEqual(expiryDate)) {
+          System.out.println("Your ticket is valid!");
+        } else {
+          System.out.println("Your ticket is invalid. It has expired.");
+        }
+      } else {
+        System.out.println("Ticket Invalid! No ticket/s found.");
+      }
+    } catch (Exception e) {
+      System.out.println("Something went wrong with getting ticket information");
+      e.printStackTrace();
+    }
   }
 }

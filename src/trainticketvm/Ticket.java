@@ -72,10 +72,6 @@ public class Ticket {
     }
   }
 
-  public static void main(String[] args) {
-    displayTicket();
-  }
-
   public String getTicketType() {
     return ticketType;
   }
