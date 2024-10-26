@@ -57,7 +57,6 @@ public class Payment {
       System.out.println("Payment Failed. Please try again.");
       return false;
     }
-
   }
 
   private boolean processCashlessPayment(double amount) {

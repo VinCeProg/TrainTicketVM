@@ -15,7 +15,8 @@ public class TrainTicketVM {
   // CHANGE THIS VALUE FOR TESTING
   private static final double BASE_PRICE = 15.00;
   private static final int TICKET_VALIDITY = 1;
-
+  
+  // MAIN
   public static void main(String[] args) {
 
     while (mainLoop) {
@@ -25,12 +26,19 @@ public class TrainTicketVM {
   }
 
   private static void landingPage() {
+    int choice = -1;
+    
     System.out.println("Train Ticket Vending Machine\n");
     System.out.println("Select Options:");
     System.out.println("1 - Buy Ticket/s");
     System.out.println("2 - Check Ticket Validity");
     System.out.print("Choice : ");
-    int choice = scanner.nextInt();
+    if(scanner.hasNextInt()){
+      choice = scanner.nextInt();
+    }else{
+      System.out.println("Please enter a valid Input!");
+      scanner.nextLine();
+    }
 
     switch (choice) {
       case 0: // exit NOTE: this will be transferred in Admin Access later
@@ -42,9 +50,6 @@ public class TrainTicketVM {
         break;
       case 2: // Check Ticket Validity
         System.out.println("Ticket Valid!\n\n");
-        break;
-      case 4: // Admin Access to Program
-
         break;
       default:
         System.out.println("Invalid input! Please select options between 1 and 2!");
@@ -60,7 +65,7 @@ public class TrainTicketVM {
 
     // Asks the user to choose ticket Type
     while (true) {
-      System.out.print("Enter Ticket Type (COMMUTER, COMMUTERX, LIMITED): ");
+      System.out.print("Select Ticket Type (COMMUTER, COMMUTERX, LIMITED): ");
       ticketType = scanner.nextLine().toUpperCase();
 
       if (ticketType.equals("COMMUTER")
@@ -82,7 +87,7 @@ public class TrainTicketVM {
     // Prompts the user to choose departure and destination
     while (true) {
       DisplayInfo.displayStations(ticketType);
-      System.out.print("Enter Departure Station : ");
+      System.out.print("Select Departure Station : ");
       if (scanner.hasNextInt()) {
         departure = scanner.nextInt();
         if (departure >= 1 && departure <= 41) {
@@ -98,7 +103,7 @@ public class TrainTicketVM {
 
     while (true) {
       DisplayInfo.displayStations(ticketType, departure);
-      System.out.print("Enter Destination Station : ");
+      System.out.print("Select Destination Station : ");
       if (scanner.hasNextInt()) {
         destination = scanner.nextInt();
         if (destination == departure || !(destination >= 1 || destination <= 41)) {
