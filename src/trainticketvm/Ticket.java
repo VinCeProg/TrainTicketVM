@@ -53,6 +53,7 @@ public class Ticket {
             PreparedStatement prep = con.prepareStatement(query)) {
       ResultSet result = prep.executeQuery();
       if (result.next()) {
+        System.out.println();
         System.out.println("********** Ticket **********");
         System.out.println("Ticket ID No  :  " + result.getInt("ticketID"));
         System.out.println("Ticket Type   :  " + result.getString("ticketType"));

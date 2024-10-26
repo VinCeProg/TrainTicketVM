@@ -146,7 +146,10 @@ public class TrainTicketVM {
 
     // if payment is successful, ticket is generated and uploaded to database
     if (paymentSuccessful) {
-      Ticket ticket = new Ticket(ticketType, issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
+      Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
     }
+    
+    System.out.println();
+    System.out.println("Thank You & have a safe trip!");
   }
 }
