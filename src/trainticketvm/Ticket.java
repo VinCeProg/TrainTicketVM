@@ -5,7 +5,7 @@ import java.sql.*;
 
 public class Ticket {
 
-  private SysConnectMySQL dbConnect = new SysConnectMySQL();
+  private static SysConnectMySQL dbConnect = new SysConnectMySQL();
   private String ticketID;
   private String ticketType;
   private Date issueDate;
@@ -14,7 +14,7 @@ public class Ticket {
   private int destinationID;
   private double amount;
   private String paymentMethod;
-  
+
   public Ticket(String ticketType, Date issueDate, Date expiryDate, int departureID, int destinationID, double amount, String paymentMethod) {
     this.ticketType = ticketType;
     this.issueDate = issueDate;
@@ -24,6 +24,7 @@ public class Ticket {
     this.amount = amount;
     this.paymentMethod = paymentMethod;
     insertTicket();
+    displayTicket();
   }
 
   public void insertTicket() {
@@ -45,16 +46,33 @@ public class Ticket {
     }
   }
 
-  private void displayTicket() {
-    throw new UnsupportedOperationException("Not supported yet.");
+  public static void displayTicket() {
+    dbConnect.connectToMachineDatabase();
+    String query = "SELECT * FROM tickets ORDER BY ticketID DESC LIMIT 1;";
+    try (Connection con = dbConnect.con;
+            PreparedStatement prep = con.prepareStatement(query)) {
+      ResultSet result = prep.executeQuery();
+      if (result.next()) {
+        System.out.println("********** Ticket **********");
+        System.out.println("Ticket ID No  :  " + result.getInt("ticketID"));
+        System.out.println("Ticket Type   :  " + result.getString("ticketType"));
+        System.out.println("Issue Date    :  " + result.getString("issueDate"));
+        System.out.println("Expiry Date   :  " + result.getString("expiryDate"));
+        System.out.println("Departure ID  :  " + result.getInt("departureID"));
+        System.out.println("DestinationID :  " + result.getInt("destinationID"));
+        System.out.println("Amount        :  P" + result.getDouble("amount"));
+        System.out.println("****************************");
+      } else {
+        System.out.println("No tickets found.");
+      }
+    } catch (Exception e) {
+      System.out.println("Something went wrong with getting ticket information");
+      e.printStackTrace();
+    }
   }
 
-  public String getTicketID() {
-    return ticketID;
-  }
-
-  public void setTicketID(String ticketID) {
-    this.ticketID = ticketID;
+  public static void main(String[] args) {
+    displayTicket();
   }
 
   public String getTicketType() {
