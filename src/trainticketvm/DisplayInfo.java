@@ -6,16 +6,24 @@ public abstract class DisplayInfo {
 
   private static SysConnectMySQL dbconnection = new SysConnectMySQL();
 
-  public static void displayStations(String ticketType) {
-    dbconnection.connectToMachineDatabase();
-    String selectedTrain = "";
+  public static String selectedTrainQuery(String ticketType) {
+
     if (ticketType.equalsIgnoreCase("COMMUTER")) {
-      selectedTrain = "onRoute_Commuter";
+      return "onRoute_Commuter";
     } else if (ticketType.equalsIgnoreCase("COMMUTERX")) {
-      selectedTrain = "onRoute_CommuterX";
+      return "onRoute_CommuterX";
     } else if (ticketType.equalsIgnoreCase("LIMITED")) {
-      selectedTrain = "onRoute_Limited";
+      return "onRoute_Limited";
+    } else {
+      return null;
     }
+  }
+
+  public static void displayStations(String ticketType) {
+
+    dbconnection.connectToMachineDatabase();
+    String selectedTrain = selectedTrainQuery(ticketType);
+
     // query to be passed onto database
     String query = "SELECT * FROM stations WHERE " + selectedTrain + " = true";
 
