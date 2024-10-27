@@ -64,20 +64,11 @@ public class TrainTicketVM {
     String ticketType = "";
     int departure = 0;
     int destination = 0;
+    boolean paymentSuccessful = false;
+    String paymentMethod = "";
 
     // Asks the user to choose ticket Type
-    while (true) {
-      System.out.print("Select Ticket Type (COMMUTER, COMMUTERX, LIMITED): ");
-      ticketType = scanner.nextLine().toUpperCase();
-
-      if (ticketType.equals("COMMUTER")
-              || ticketType.equals("COMMUTERX")
-              || ticketType.equals("LIMITED")) {
-        break;
-      } else {
-        System.out.println("Invalid input! Please enter a valid ticket type.");
-      }
-    }
+    ticketType = selectTicketType();
 
     // Generate issue and expiryDate
     Date issueDate = new Date();
@@ -87,35 +78,18 @@ public class TrainTicketVM {
     Date expiryDate = cal.getTime();
 
     // Prompts the user to choose departure and destination
-    while (true) {
-      DisplayInfo.displayStations(ticketType);
+    DisplayInfo.displayStations(ticketType);
+    while (departure == 0) {
       System.out.print("Select Departure Station : ");
-      if (scanner.hasNextInt()) {
-        departure = scanner.nextInt();
-        if (departure >= 1 && departure <= 41) {
-          break;
-        } else {
-          System.out.println("Invalid Departure Station!");
-        }
-      } else {
-        System.out.println("Invalid Input! Please enter a valid number!");
-        scanner.nextLine();
-      }
+      departure = validateStation();
     }
 
-    while (true) {
-      DisplayInfo.displayStations(ticketType, departure);
+    DisplayInfo.displayStations(ticketType, departure);
+    while (destination == 0) {
       System.out.print("Select Destination Station : ");
-      if (scanner.hasNextInt()) {
-        destination = scanner.nextInt();
-        if (destination == departure || !(destination >= 1 || destination <= 41)) {
-          System.out.println("Invalid Input! Please enter a valid number!");
-        } else {
-          break;
-        }
-      } else {
+      destination = validateStation();
+      if (destination == departure) {
         System.out.println("Invalid Input! Please enter a valid number!");
-        scanner.nextLine();
       }
     }
 
@@ -128,9 +102,7 @@ public class TrainTicketVM {
     System.out.println();
 
     // Payment
-    boolean paymentSuccessful = false;
     Payment payment = new Payment();
-    String paymentMethod = "";
 
     while (true) {
       System.out.print("Choose payment method (CASH, CARD, or MOBILE): ");
@@ -209,6 +181,39 @@ public class TrainTicketVM {
     } catch (Exception e) {
       System.out.println("Something went wrong with getting ticket information");
       e.printStackTrace();
+    }
+  }
+
+// METHODS FOR buyTickets
+  private static String selectTicketType() {
+    while (true) {
+      System.out.print("Select Ticket Type (COMMUTER, COMMUTERX, LIMITED): ");
+      String ticketType = scanner.nextLine().toUpperCase();
+
+      if (ticketType.equals("COMMUTER")
+              || ticketType.equals("COMMUTERX")
+              || ticketType.equals("LIMITED")) {
+        return ticketType;
+      } else {
+        System.out.println("Invalid input! Please enter a valid ticket type.");
+      }// if else
+    }// while
+  }//selectTicketType
+
+  private static int validateStation() {
+    int departure = 0;
+    if (scanner.hasNextInt()) {
+      departure = scanner.nextInt();
+      if (departure >= 1 && departure <= 41) {
+        return departure;
+      } else {
+        System.out.println("Invalid Station!");
+        return 0;
+      }
+    } else {
+      System.out.println("Invalid Input! Please enter a valid number!");
+      scanner.nextLine();
+      return 0;
     }
   }
 }
