@@ -143,10 +143,10 @@ public class TrainTicketVM {
         if (today.isBefore(expiryDate) || today.isEqual(expiryDate)) {
           System.out.println("Your ticket is valid!");
         } else {
-          System.out.println("Your ticket is invalid. It has expired.");
+          System.out.println("Your ticket is expired.");
         }
       } else {
-        System.out.println("Ticket Invalid! No ticket/s found.");
+        System.out.println("Ticket Invalid! No ticket/s found.\n\n");
       }
     } catch (Exception e) {
       System.out.println("Something went wrong with getting ticket information");
