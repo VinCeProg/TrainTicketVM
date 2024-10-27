@@ -4,30 +4,17 @@ import java.sql.*;
 
 public abstract class DisplayInfo {
 
-  private static SysConnectMySQL dbconnection = new SysConnectMySQL();
-
-  public static String selectedTrainQuery(String ticketType) {
-
-    if (ticketType.equalsIgnoreCase("COMMUTER")) {
-      return "onRoute_Commuter";
-    } else if (ticketType.equalsIgnoreCase("COMMUTERX")) {
-      return "onRoute_CommuterX";
-    } else if (ticketType.equalsIgnoreCase("LIMITED")) {
-      return "onRoute_Limited";
-    } else {
-      return null;
-    }
-  }
+  private static SysConnectMySQL dbConnect = new SysConnectMySQL();
 
   public static void displayStations(String ticketType) {
 
-    dbconnection.connectToMachineDatabase();
+    dbConnect.connectToMachineDatabase();
     String selectedTrain = selectedTrainQuery(ticketType);
 
     // query to be passed onto database
     String query = "SELECT * FROM stations WHERE " + selectedTrain + " = true";
 
-    try (Connection con = dbconnection.con;
+    try (Connection con = dbConnect.con;
             PreparedStatement prep = con.prepareStatement(query)) {
       ResultSet result = prep.executeQuery();
       System.out.println("Station ID \t Station Name");
@@ -42,9 +29,22 @@ public abstract class DisplayInfo {
       e.printStackTrace();
     }
   }
+  
+  public static String selectedTrainQuery(String ticketType) {
+
+    if (ticketType.equalsIgnoreCase("COMMUTER")) {
+      return "onRoute_Commuter";
+    } else if (ticketType.equalsIgnoreCase("COMMUTERX")) {
+      return "onRoute_CommuterX";
+    } else if (ticketType.equalsIgnoreCase("LIMITED")) {
+      return "onRoute_Limited";
+    } else {
+      return null;
+    }
+  }
 
   public static void displayStations(String ticketType, int departureStation) {
-    dbconnection.connectToMachineDatabase();
+    dbConnect.connectToMachineDatabase();
     String selectedTrain = "";
     if (ticketType.equalsIgnoreCase("COMMUTER")) {
       selectedTrain = "onRoute_Commuter";
@@ -56,7 +56,7 @@ public abstract class DisplayInfo {
 
     String query = "SELECT * FROM stations WHERE " + selectedTrain + " = true AND stationID != " + departureStation;
 
-    try (Connection con = dbconnection.con;
+    try (Connection con = dbConnect.con;
             PreparedStatement prep = con.prepareStatement(query)) {
       ResultSet result = prep.executeQuery();
       System.out.println("Station ID \t Station Name");
