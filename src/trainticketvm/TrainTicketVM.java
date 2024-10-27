@@ -60,6 +60,7 @@ public class TrainTicketVM {
   }
 
   private static void buyTicket() {
+    Payment payment = new Payment();
     scanner.nextLine(); // resets scanner from int to string
     String ticketType = "";
     int departure = 0;
@@ -101,35 +102,12 @@ public class TrainTicketVM {
     System.out.printf(formatAmt, ticketAmount);
     System.out.println();
 
-    // Payment
-    Payment payment = new Payment();
-
-    while (true) {
-      System.out.print("Choose payment method (CASH, CARD, or MOBILE): ");
-      paymentMethod = scanner.next().toUpperCase();
-
-      switch (paymentMethod) {
-        case "CASH":
-          paymentSuccessful = payment.makeCashPayment(ticketAmount);
-          break;
-        case "CARD":
-        case "MOBILE":
-          paymentSuccessful = payment.makeCashlessPayment(ticketAmount, paymentMethod);
-          break;
-        default:
-          System.out.println("Invalid Payment Method!");
-          continue;
-      }
-      break;
-    }
-
     // if payment is successful, ticket is generated and uploaded to database
-    if (paymentSuccessful) {
+    if (payment.paymentMethod(ticketAmount)) {
       Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
+      System.out.println("\nThank You & have a safe trip!");
     }
 
-    System.out.println();
-    System.out.println("Thank You & have a safe trip!");
   }
 
   public static void validateTicket() {
@@ -214,6 +192,6 @@ public class TrainTicketVM {
       System.out.println("Invalid Input! Please enter a valid number!");
       scanner.nextLine();
       return 0;
-    }
-  }
+    }// if else
+  }//validateStation
 }
