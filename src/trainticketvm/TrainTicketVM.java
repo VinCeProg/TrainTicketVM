@@ -18,15 +18,6 @@ public class TrainTicketVM {
   private static final double BASE_PRICE = 15.00;
   private static final int TICKET_VALIDITY = 1;
 
-  // MAIN
-  public static void main(String[] args) {
-
-    while (mainLoop) {
-      landingPage();
-    }
-    System.out.println("Powering OFF!");
-  }
-
   private static void landingPage() {
     int choice = -1;
 
@@ -82,15 +73,16 @@ public class TrainTicketVM {
     DisplayInfo.displayStations(ticketType);
     while (departure == 0) {
       System.out.print("Select Departure Station : ");
-      departure = validateStation();
+      departure = validateStation(ticketType);
     }
 
     DisplayInfo.displayStations(ticketType, departure);
     while (destination == 0) {
       System.out.print("Select Destination Station : ");
-      destination = validateStation();
+      destination = validateStation(ticketType);
       if (destination == departure) {
         System.out.println("Invalid Input! Please enter a valid number!");
+        destination = 0;
       }
     }
 
@@ -162,7 +154,6 @@ public class TrainTicketVM {
     }
   }
 
-// METHODS FOR buyTickets
   private static String selectTicketType() {
     while (true) {
       System.out.print("Select Ticket Type (COMMUTER, COMMUTERX, LIMITED): ");
@@ -176,14 +167,14 @@ public class TrainTicketVM {
         System.out.println("Invalid input! Please enter a valid ticket type.");
       }// if else
     }// while
-  }//selectTicketType
+  }
 
-  private static int validateStation() {
-    int departure = 0;
+  private static int validateStation(String ticketType) {
+    int station = 0;
     if (scanner.hasNextInt()) {
-      departure = scanner.nextInt();
-      if (departure >= 1 && departure <= 41) {
-        return departure;
+      station = scanner.nextInt();
+      if ((station >= 1 && station <= 41) && validateStation(ticketType, station)) {
+        return station;
       } else {
         System.out.println("Invalid Station!");
         return 0;
@@ -193,5 +184,35 @@ public class TrainTicketVM {
       scanner.nextLine();
       return 0;
     }// if else
-  }//validateStation
+  }
+
+  private static boolean validateStation(String ticketType, int station) {
+    dbConnect.connectToMachineDatabase();
+    String selectedTrain = DisplayInfo.selectedTrainQuery(ticketType);
+    String query = "SELECT * FROM stations WHERE stationID = ?";
+
+    try (Connection con = dbConnect.con;
+            PreparedStatement prep = con.prepareStatement(query)) {
+      prep.setInt(1, station);
+      ResultSet result = prep.executeQuery();
+      if (result.next()) {
+        return result.getBoolean(selectedTrain);
+      } else {
+        System.out.println("No Records Found!");
+        return false;
+      }
+    } catch (Exception e) {
+      System.out.println("Something went wrong with validating station.");
+      e.printStackTrace();
+      return false;
+    }
+
+  }
+
+  public static void main(String[] args) {
+    while (mainLoop) {
+      landingPage();
+    }
+    System.out.println("Powering OFF!");
+  }
 }
