@@ -5,9 +5,29 @@ import java.util.InputMismatchException;
 
 public class Payment {
   
+  private Scanner scanner = new Scanner(System.in);
+  
+  public boolean paymentMethod(double ticketAmount){
+    String paymentMethod = "";
+    while (true) {
+      System.out.print("Choose payment method (CASH, CARD, or MOBILE): ");
+      paymentMethod = scanner.next().toUpperCase();
+
+      switch (paymentMethod) {
+        case "CASH":
+          return makeCashPayment(ticketAmount);
+        case "CARD":
+        case "MOBILE":
+          return makeCashlessPayment(ticketAmount, paymentMethod);
+        default:
+          System.out.println("Invalid Payment Method!");
+          continue;
+      }
+    }
+  }
+  
   public boolean makeCashPayment(double amount) {
 
-    Scanner scanner = new Scanner(System.in);
     double totalInserted = 0;
     double remainingAmount = amount;
 
