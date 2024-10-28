@@ -170,34 +170,38 @@ public class TrainTicketVM {
   }
 
   private static int validateStation(String ticketType, int station) {
-    station = scanner.nextInt();
-    dbConnect.connectToMachineDatabase();
-    String selectedTrain = DisplayInfo.selectedTrainQuery(ticketType);
-    String query = "SELECT * FROM stations WHERE stationID = ?";
+    if (scanner.hasNextInt()) {
+      station = scanner.nextInt();
+      dbConnect.connectToMachineDatabase();
+      String selectedTrain = DisplayInfo.selectedTrainQuery(ticketType);
+      String query = "SELECT * FROM stations WHERE stationID = ?";
 
-    try (Connection con = dbConnect.con;
-            PreparedStatement prep = con.prepareStatement(query)) {
-      prep.setInt(1, station);
-      ResultSet result = prep.executeQuery();
-      
-      if (result.next()) {
-        if(result.getBoolean(selectedTrain)){
-          return station;
-        }else{
+      try (Connection con = dbConnect.con;
+              PreparedStatement prep = con.prepareStatement(query)) {
+        prep.setInt(1, station);
+        ResultSet result = prep.executeQuery();
+
+        if (!result.next()) {
+          System.out.println("No Station Found!");
+          return 0;
+        }
+        if (!result.getBoolean(selectedTrain)) {
           System.out.println("Station not available for " + ticketType);
           return 0;
         }
-      } else {
-        System.out.println("No Station Found!");
+        return station;
+        
+      } catch (Exception e) {
+        System.out.println("Something went wrong with validating station.");
+        e.printStackTrace();
         return 0;
       }
-    } catch (Exception e) {
-      System.out.println("Something went wrong with validating station.");
-      e.printStackTrace();
-      return 0;
+    } else {
+      System.out.println("Invalid input! Please enter a number!");
+      scanner.nextLine();
     }
+    return 0;
   }
-
 
   public static void main(String[] args) {
     while (mainLoop) {
