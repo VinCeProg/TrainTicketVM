@@ -73,13 +73,13 @@ public class TrainTicketVM {
     DisplayInfo.displayStations(ticketType);
     while (departure == 0) {
       System.out.print("Select Departure Station : ");
-      departure = validateStation(ticketType);
+      departure = validateStation(ticketType, departure);
     }
 
     DisplayInfo.displayStations(ticketType, departure);
     while (destination == 0) {
       System.out.print("Select Destination Station : ");
-      destination = validateStation(ticketType);
+      destination = validateStation(ticketType, destination);
       if (destination == departure) {
         System.out.println("Invalid Input! Please enter a valid number!");
         destination = 0;
@@ -169,24 +169,8 @@ public class TrainTicketVM {
     }// while
   }
 
-  private static int validateStation(String ticketType) {
-    int station = 0;
-    if (scanner.hasNextInt()) {
-      station = scanner.nextInt();
-      if ((station >= 1 && station <= 41) && validateStation(ticketType, station)) {
-        return station;
-      } else {
-        System.out.println("Invalid Station!");
-        return 0;
-      }
-    } else {
-      System.out.println("Invalid Input! Please enter a valid number!");
-      scanner.nextLine();
-      return 0;
-    }// if else
-  }
-
-  private static boolean validateStation(String ticketType, int station) {
+  private static int validateStation(String ticketType, int station) {
+    station = scanner.nextInt();
     dbConnect.connectToMachineDatabase();
     String selectedTrain = DisplayInfo.selectedTrainQuery(ticketType);
     String query = "SELECT * FROM stations WHERE stationID = ?";
@@ -195,19 +179,25 @@ public class TrainTicketVM {
             PreparedStatement prep = con.prepareStatement(query)) {
       prep.setInt(1, station);
       ResultSet result = prep.executeQuery();
+      
       if (result.next()) {
-        return result.getBoolean(selectedTrain);
+        if(result.getBoolean(selectedTrain)){
+          return station;
+        }else{
+          System.out.println("Station not available for " + ticketType);
+          return 0;
+        }
       } else {
-        System.out.println("No Records Found!");
-        return false;
+        System.out.println("No Station Found!");
+        return 0;
       }
     } catch (Exception e) {
       System.out.println("Something went wrong with validating station.");
       e.printStackTrace();
-      return false;
+      return 0;
     }
-
   }
+
 
   public static void main(String[] args) {
     while (mainLoop) {
