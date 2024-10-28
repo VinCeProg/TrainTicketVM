@@ -73,13 +73,13 @@ public class TrainTicketVM {
     DisplayInfo.displayStations(ticketType);
     while (departure == 0) {
       System.out.print("Select Departure Station : ");
-      departure = validateStation(ticketType, departure);
+      departure = validateStation(ticketType);
     }
 
     DisplayInfo.displayStations(ticketType, departure);
     while (destination == 0) {
       System.out.print("Select Destination Station : ");
-      destination = validateStation(ticketType, destination);
+      destination = validateStation(ticketType);
       if (destination == departure) {
         System.out.println("Invalid Input! Please enter a valid number!");
         destination = 0;
@@ -169,36 +169,30 @@ public class TrainTicketVM {
     }// while
   }
 
-  private static int validateStation(String ticketType, int station) {
-    if (scanner.hasNextInt()) {
-      station = scanner.nextInt();
-      dbConnect.connectToMachineDatabase();
-      String selectedTrain = DisplayInfo.selectedTrainQuery(ticketType);
-      String query = "SELECT * FROM stations WHERE stationID = ?";
-
-      try (Connection con = dbConnect.con;
-              PreparedStatement prep = con.prepareStatement(query)) {
-        prep.setInt(1, station);
-        ResultSet result = prep.executeQuery();
-
-        if (!result.next()) {
-          System.out.println("No Station Found!");
-          return 0;
-        }
-        if (!result.getBoolean(selectedTrain)) {
-          System.out.println("Station not available for " + ticketType);
-          return 0;
-        }
-        return station;
-        
-      } catch (Exception e) {
-        System.out.println("Something went wrong with validating station.");
-        e.printStackTrace();
-        return 0;
-      }
-    } else {
+  private static int validateStation(String ticketType) {
+    if (!scanner.hasNextInt()) {
       System.out.println("Invalid input! Please enter a number!");
-      scanner.nextLine();
+      scanner.nextLine(); // clear the invalid input
+      return 0;
+    }
+
+    int station = scanner.nextInt();
+    dbConnect.connectToMachineDatabase();
+    String selectedTrain = DisplayInfo.selectedTrainQuery(ticketType);
+    String query = "SELECT * FROM stations WHERE stationID = ?";
+
+    try (Connection con = dbConnect.con; PreparedStatement prep = con.prepareStatement(query)) {
+      prep.setInt(1, station);
+      ResultSet result = prep.executeQuery();
+      boolean hasResult = result.next();
+      if (hasResult && result.getBoolean(selectedTrain)) {
+        return station;
+      } else {
+        System.out.println(hasResult ? "Station not available for " + ticketType : "No Station Found!");
+      }
+    } catch (Exception e) {
+      System.out.println("Something went wrong with validating station.");
+      e.printStackTrace();
     }
     return 0;
   }
