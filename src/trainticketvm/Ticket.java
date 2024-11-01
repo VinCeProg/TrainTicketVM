@@ -30,24 +30,31 @@ public class Ticket {
   public void insertTicket() {
     dbConnect.connectToMachineDatabase();
     String query = "INSERT INTO tickets (ticketType, issueDate, expiryDate, departureID, destinationID, amount, paymentMethod) VALUES(?, ?, ?, ?, ?, ?, ?)";
-    try (Connection con = dbConnect.con;
-            PreparedStatement prep = con.prepareStatement(query)) {
-      prep.setString(1, ticketType);
-      prep.setDate(2, new java.sql.Date(issueDate.getTime()));
-      prep.setDate(3, new java.sql.Date(expiryDate.getTime()));
-      prep.setInt(4, departureID);
-      prep.setInt(5, destinationID);
-      prep.setDouble(6, amount);
-      prep.setString(7, paymentMethod);
-      prep.executeUpdate();
+    Connection con = null;
+    PreparedStatement prep = null;
+    try {
+        con = dbConnect.con;
+        prep = con.prepareStatement(query);
+        prep.setString(1, ticketType);
+        prep.setDate(2, new java.sql.Date(issueDate.getTime()));
+        prep.setDate(3, new java.sql.Date(expiryDate.getTime()));
+        prep.setInt(4, departureID);
+        prep.setInt(5, destinationID);
+        prep.setDouble(6, amount);
+        prep.setString(7, paymentMethod);
+        prep.executeUpdate();
     } catch (Exception e) {
-      System.out.println("Something went wrong with inserting ticket into database!");
-      e.printStackTrace();
+        System.out.println("Something went wrong with inserting ticket into database!");
+        e.printStackTrace();
+    } finally {
+        dbConnect.closeResources(con, prep, null);
     }
-  }
+}
+
 
   public static void displayTicket() {
     dbConnect.connectToMachineDatabase();
+    DisplayInfo disp = new DisplayInfo();
     String query = "SELECT * FROM tickets ORDER BY ticketID DESC LIMIT 1;";
     try (Connection con = dbConnect.con;
             PreparedStatement prep = con.prepareStatement(query)) {
@@ -59,8 +66,8 @@ public class Ticket {
         System.out.println("Ticket Type   :  " + result.getString("ticketType"));
         System.out.println("Issue Date    :  " + result.getString("issueDate"));
         System.out.println("Expiry Date   :  " + result.getString("expiryDate"));
-        System.out.println("Departure ID  :  " + result.getInt("departureID"));
-        System.out.println("DestinationID :  " + result.getInt("destinationID"));
+        System.out.println("Departure     :  " + disp.displaySelectedStation(result.getInt("departureID")));
+        System.out.println("Destination   :  " + disp.displaySelectedStation(result.getInt("destinationID")));
         System.out.println("Amount        :  P" + result.getDouble("amount"));
         System.out.println("****************************");
       } else {
