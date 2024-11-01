@@ -11,6 +11,7 @@ public class TrainTicketVM {
 
   private static Scanner scanner = new Scanner(System.in);
   private static SysConnectMySQL dbConnect = new SysConnectMySQL();
+  private static DisplayInfo disp = new DisplayInfo();
   private static boolean mainLoop = true;
   private static String formatAmt = "%.2f";
 
@@ -18,7 +19,7 @@ public class TrainTicketVM {
   private static final double BASE_PRICE = 15.00;
   private static final int TICKET_VALIDITY = 1;
 
-  private static void landingPage() {
+  private void landingPage() {
     int choice = -1;
 
     System.out.println("Train Ticket Vending Machine\n");
@@ -50,7 +51,7 @@ public class TrainTicketVM {
     }//switch
   }
 
-  private static void buyTicket() {
+  private void buyTicket() {
     Payment payment = new Payment();
     scanner.nextLine(); // resets scanner from int to string
     String ticketType = "";
@@ -70,26 +71,30 @@ public class TrainTicketVM {
     Date expiryDate = cal.getTime();
 
     // Prompts the user to choose departure and destination
-    DisplayInfo.displayStations(ticketType);
+    disp.displayStations(ticketType);
     while (departure == 0) {
-      System.out.print("Select Departure Station : ");
+      System.out.print("Enter Departure Station : ");
       departure = validateStation(ticketType);
     }
+    System.out.println("You have selected " + disp.displaySelectedStation(departure) + "\n");
 
-    DisplayInfo.displayStations(ticketType, departure);
+    disp.displayStations(ticketType, departure);
     while (destination == 0) {
-      System.out.print("Select Destination Station : ");
+      System.out.print("Enter Destination Station : ");
       destination = validateStation(ticketType);
       if (destination == departure) {
         System.out.println("Invalid Input! Please enter a valid number!");
         destination = 0;
       }
     }
+    System.out.println("You have selected " + disp.displaySelectedStation(destination) + "\n");
 
     // Calculate ticket amount
     double tixType = (ticketType.equalsIgnoreCase("LIMITED")) ? 1.75
             : (ticketType.equalsIgnoreCase("COMMUTERX")) ? 1.50 : 1.00;
     double ticketAmount = BASE_PRICE + Math.abs(destination - departure) * tixType;
+    
+    System.out.println(disp.displaySelectedStation(departure) + " Station to " + disp.displaySelectedStation(destination) + " Station");
     System.out.print("The Price for the ticket is ");
     System.out.printf(formatAmt, ticketAmount);
     System.out.println();
@@ -102,7 +107,7 @@ public class TrainTicketVM {
 
   }
 
-  public static void validateTicket() {
+  public void validateTicket() {
 
     int ticketNum = 0;
 
@@ -154,7 +159,7 @@ public class TrainTicketVM {
     }
   }
 
-  private static String selectTicketType() {
+  private String selectTicketType() {
     while (true) {
       System.out.print("Select Ticket Type (COMMUTER, COMMUTERX, LIMITED): ");
       String ticketType = scanner.nextLine().toUpperCase();
@@ -169,7 +174,7 @@ public class TrainTicketVM {
     }// while
   }
 
-  private static int validateStation(String ticketType) {
+  private int validateStation(String ticketType) {
     if (!scanner.hasNextInt()) {
       System.out.println("Invalid input! Please enter a number!");
       scanner.nextLine(); // clear the invalid input
@@ -178,7 +183,7 @@ public class TrainTicketVM {
 
     int station = scanner.nextInt();
     dbConnect.connectToMachineDatabase();
-    String selectedTrain = DisplayInfo.selectedTrainQuery(ticketType);
+    String selectedTrain = disp.selectedTrainQuery(ticketType);
     String query = "SELECT * FROM stations WHERE stationID = ?";
 
     try (Connection con = dbConnect.con; PreparedStatement prep = con.prepareStatement(query)) {
@@ -198,8 +203,9 @@ public class TrainTicketVM {
   }
 
   public static void main(String[] args) {
+    TrainTicketVM vendingMachine = new TrainTicketVM();
     while (mainLoop) {
-      landingPage();
+      vendingMachine.landingPage();
     }
     System.out.println("Powering OFF!");
   }
