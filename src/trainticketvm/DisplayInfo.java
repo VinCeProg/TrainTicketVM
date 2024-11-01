@@ -54,7 +54,9 @@ public class DisplayInfo {
     try (Connection con = dbConnect.con;
             PreparedStatement prep = con.prepareStatement(query)) {
       ResultSet result = prep.executeQuery();
+      System.out.println("--------------------------------");
       System.out.println("Station ID \t Station Name");
+      System.out.println("--------------------------------");
       while (result.next()) {
         int stationID = result.getInt("stationID");
         String stationName = result.getString("stationName");
