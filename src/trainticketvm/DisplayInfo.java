@@ -7,16 +7,16 @@ public class DisplayInfo {
   private SysConnectMySQL dbConnect = new SysConnectMySQL();
 
   public void displayStations(String ticketType) {
-
     dbConnect.connectToMachineDatabase();
     String selectedTrain = selectedTrainQuery(ticketType);
-
-    // query to be passed onto database
     String query = "SELECT * FROM stations WHERE " + selectedTrain + " = true";
-
-    try (Connection con = dbConnect.con;
-            PreparedStatement prep = con.prepareStatement(query)) {
-      ResultSet result = prep.executeQuery();
+    Connection con = null;
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
+      result = prep.executeQuery();
       System.out.println("--------------------------------");
       System.out.println("Station ID \t Station Name");
       System.out.println("--------------------------------");
@@ -25,10 +25,11 @@ public class DisplayInfo {
         String stationName = result.getString("stationName");
         System.out.println(stationID + "\t\t " + stationName);
       }
-
     } catch (Exception e) {
       System.out.println("Something went wrong with displaying Stations");
       e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, result);
     }
   }
 
@@ -48,12 +49,14 @@ public class DisplayInfo {
   public void displayStations(String ticketType, int departureStation) {
     dbConnect.connectToMachineDatabase();
     String selectedTrain = selectedTrainQuery(ticketType);
-
     String query = "SELECT * FROM stations WHERE " + selectedTrain + " = true AND stationID != " + departureStation;
-
-    try (Connection con = dbConnect.con;
-            PreparedStatement prep = con.prepareStatement(query)) {
-      ResultSet result = prep.executeQuery();
+    Connection con = null;
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
+      result = prep.executeQuery();
       System.out.println("--------------------------------");
       System.out.println("Station ID \t Station Name");
       System.out.println("--------------------------------");
@@ -62,27 +65,35 @@ public class DisplayInfo {
         String stationName = result.getString("stationName");
         System.out.println(stationID + "\t\t " + stationName);
       }
-
     } catch (Exception e) {
       System.out.println("Something went wrong with displaying Stations");
       e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, result);
     }
   }
 
   public String displaySelectedStation(int station) {
     dbConnect.connectToMachineDatabase();
     String query = "SELECT * FROM stations WHERE stationID = ?";
-
-    try (Connection con = dbConnect.con; PreparedStatement prep = con.prepareStatement(query)) {
+    Connection con = null;
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
       prep.setInt(1, station);
-      ResultSet result = prep.executeQuery();
-      if(result.next()){
+      result = prep.executeQuery();
+      if (result.next()) {
         return result.getString("stationName");
       }
     } catch (Exception e) {
       System.out.println("Something went wrong with displaying selected station!");
       e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, result);
     }
     return "Error!";
   }
+
 }
