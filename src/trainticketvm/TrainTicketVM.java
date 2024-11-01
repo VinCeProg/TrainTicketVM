@@ -76,7 +76,7 @@ public class TrainTicketVM {
       System.out.print("Enter Departure Station : ");
       departure = validateStation(ticketType);
     }
-    System.out.println("You have selected " + disp.displaySelectedStation(departure) + "\n");
+    System.out.println("You have selected " + disp.displaySelectedStation(departure) + " Station.\n");
 
     disp.displayStations(ticketType, departure);
     while (destination == 0) {
@@ -87,27 +87,29 @@ public class TrainTicketVM {
         destination = 0;
       }
     }
-    System.out.println("You have selected " + disp.displaySelectedStation(destination) + "\n");
+    System.out.println("You have selected " + disp.displaySelectedStation(destination) + " Station\n");
 
     // Calculate ticket amount
     double tixType = (ticketType.equalsIgnoreCase("LIMITED")) ? 1.75
             : (ticketType.equalsIgnoreCase("COMMUTERX")) ? 1.50 : 1.00;
     double ticketAmount = BASE_PRICE + Math.abs(destination - departure) * tixType;
-    
+
     System.out.println(disp.displaySelectedStation(departure) + " Station to " + disp.displaySelectedStation(destination) + " Station");
-    System.out.print("The Price for the ticket is ");
+    System.out.print("The Price for the ticket is P");
     System.out.printf(formatAmt, ticketAmount);
     System.out.println();
 
-    // if payment is successful, ticket is generated and uploaded to database
-    if (payment.paymentMethod(ticketAmount)) {
-      Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
-      System.out.println("\nThank You & have a safe trip!");
+    if (confirmTransaction()) {
+      // if payment is successful, ticket is generated and uploaded to database
+      if (payment.paymentMethod(ticketAmount)) {
+        Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
+        System.out.println("\nThank You & have a safe trip!");
+      }
     }
 
   }
 
-  public void validateTicket() {
+  private void validateTicket() {
 
     int ticketNum = 0;
 
@@ -200,6 +202,22 @@ public class TrainTicketVM {
       e.printStackTrace();
     }
     return 0;
+  }
+
+  private boolean confirmTransaction() {
+    scanner.nextLine();
+    System.out.print("Confirm Transaction? (Y/N): ");
+    char choice = scanner.next().toUpperCase().charAt(0);
+    while (choice != 'Y' && choice != 'N') {
+      System.out.println("Invalid input! Please enter a valid input!");
+      choice = scanner.next().toUpperCase().charAt(0);
+    }
+    if (choice == 'Y') {
+      return true;
+    } else {
+      System.out.println("Transaction Cancelled!");
+      return false;
+    }
   }
 
   public static void main(String[] args) {
