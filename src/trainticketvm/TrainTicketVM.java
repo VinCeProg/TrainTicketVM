@@ -20,12 +20,12 @@ public class TrainTicketVM {
   private static final int TICKET_VALIDITY = 1;
 
   private void landingPage() {
-    int choice = -1;
+    int choice = 0;
 
     System.out.println("Train Ticket Vending Machine\n");
     System.out.println("Select Options:");
     System.out.println("1 - Buy Ticket/s");
-    System.out.println("2 - Check Ticket Validity");
+    System.out.println("2 - Check Ticket Validity (Extend)");
     System.out.print("Choice : ");
     if (scanner.hasNextInt()) {
       choice = scanner.nextInt();
@@ -52,7 +52,6 @@ public class TrainTicketVM {
   }
 
   private void buyTicket() {
-    Payment payment = new Payment();
     scanner.nextLine(); // resets scanner from int to string
     String ticketType = "";
     int departure = 0;
@@ -107,6 +106,7 @@ public class TrainTicketVM {
     System.out.println();
 
     if (confirmTransaction()) {
+      Payment payment = new Payment();
       if (payment.paymentMethod(totalAmount)) {
         for (int i = 0; i < numOfTickets; i++) {
           Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
@@ -115,58 +115,6 @@ public class TrainTicketVM {
       }
     }
 
-  }
-
-  private void validateTicket() {
-    int ticketNum = 0;
-    while (true) {
-      System.out.print("Enter Ticket Number : ");
-      if (scanner.hasNextInt()) {
-        ticketNum = scanner.nextInt();
-        if (ticketNum <= 12340000) {
-          System.out.println("Invalid Ticket Number! Please enter your ticket number correctly!");
-        } else {
-          break;
-        }
-      } else {
-        System.out.println("Invalid Ticket Number! Please enter a valid ticket number!");
-        scanner.nextLine();
-      }
-    }
-    dbConnect.connectToMachineDatabase();
-    String query = "SELECT * FROM tickets WHERE ticketID = ?;";
-    Connection con = null;
-    PreparedStatement prep = null;
-    ResultSet result = null;
-    try {
-      con = dbConnect.con;
-      prep = con.prepareStatement(query);
-      prep.setInt(1, ticketNum);
-      result = prep.executeQuery();
-      if (result.next()) {
-        System.out.println();
-        System.out.println("********** Ticket **********");
-        System.out.println("Ticket ID No  :  " + result.getInt("ticketID"));
-        System.out.println("Issue Date    :  " + result.getString("issueDate"));
-        System.out.println("Expiry Date   :  " + result.getString("expiryDate"));
-        System.out.println("****************************");
-        LocalDate today = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate expiryDate = LocalDate.parse(result.getString("expiryDate"), formatter);
-        if (today.isBefore(expiryDate) || today.isEqual(expiryDate)) {
-          System.out.println("Your ticket is valid!");
-        } else {
-          System.out.println("Your ticket is expired.");
-        }
-      } else {
-        System.out.println("Ticket Invalid! No ticket/s found.\n\n");
-      }
-    } catch (Exception e) {
-      System.out.println("Something went wrong with getting ticket information");
-      e.printStackTrace();
-    } finally {
-      dbConnect.closeResources(con, prep, result);
-    }
   }
 
   private String selectTicketType() {
@@ -213,12 +161,15 @@ public class TrainTicketVM {
   }
 
   private boolean confirmTransaction() {
-    scanner.nextLine();
-    System.out.print("Confirm Transaction? (Y/N): ");
-    char choice = scanner.next().toUpperCase().charAt(0);
-    while (choice != 'Y' && choice != 'N') {
-      System.out.println("Invalid input! Please enter a valid input!");
+    char choice;
+    while (true) {
+      System.out.print("Confirm Transaction? (Y/N): ");
       choice = scanner.next().toUpperCase().charAt(0);
+      if (choice == 'Y' || choice == 'N') {
+        break;
+      } else {
+        System.out.println("Invalid input! Please enter 'Y' or 'N'.");
+      }
     }
     if (choice == 'Y') {
       return true;
@@ -238,6 +189,147 @@ public class TrainTicketVM {
       scanner.nextLine(); // clear invalid input
     }
     return numOfTickets;
+  }
+
+  private void validateTicket() {
+    int ticketNum = 0;
+    while (true) {
+      System.out.print("Enter Ticket Number : ");
+      if (scanner.hasNextInt()) {
+        ticketNum = scanner.nextInt();
+        if (ticketNum <= 12340000) {
+          System.out.println("Invalid Ticket Number! Please enter your ticket number correctly!");
+          scanner.nextLine();
+        } else {
+          break;
+        }
+      } else {
+        System.out.println("Invalid Ticket Number! Please enter a valid ticket number!");
+        scanner.nextLine();
+      }
+    }
+    dbConnect.connectToMachineDatabase();
+    String query = "SELECT * FROM tickets WHERE ticketID = ?;";
+    Connection con = null;
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
+      prep.setInt(1, ticketNum);
+      result = prep.executeQuery();
+      if (result.next()) {
+        System.out.println();
+        System.out.println("********** Ticket **********");
+        System.out.println("Ticket ID No  :  " + result.getInt("ticketID"));
+        System.out.println("Issue Date    :  " + result.getString("issueDate"));
+        System.out.println("Expiry Date   :  " + result.getString("expiryDate"));
+        System.out.println("****************************");
+
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate expiryDate = LocalDate.parse(result.getString("expiryDate"), formatter);
+
+        if (today.isBefore(expiryDate) || today.isEqual(expiryDate)) {
+          System.out.println("Your ticket is valid until " + result.getString("expiryDate") + ".");
+          extendTicketValidity(ticketNum);
+        } else {
+          System.out.println("Your ticket is expired and cannot be extended.");
+        }
+      } else {
+        System.out.println("Ticket Invalid! No ticket/s found.\n\n");
+      }
+    } catch (Exception e) {
+      System.out.println("Something went wrong with getting ticket information");
+      e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, result);
+    }
+  }
+
+  private void extendTicketValidity(int TicketNum) {
+    char choice;
+    while (true) {
+      System.out.print("Would you like to extend your ticket validity? (Y/N) : ");
+      choice = scanner.next().toUpperCase().charAt(0);
+      if (choice == 'Y' || choice == 'N') {
+        break;
+      } else {
+        System.out.println("Invalid input! Please enter 'Y' or 'N'.");
+      }
+    }
+    if (choice == 'Y') {
+      processExtendTicket(TicketNum);
+    } else {
+      System.out.println("Transaction aborted.\n");
+    }
+  }
+
+  private void processExtendTicket(int ticketNum) {
+    scanner.nextLine(); // Clear scanner buffer
+    int extensionDays = 0;
+
+    // Loop until a valid extension period is entered
+    while (true) {
+      System.out.print("Enter extension period (1/3/7) days: ");
+      if (scanner.hasNextInt()) {
+        extensionDays = scanner.nextInt();
+        if (extensionDays == 1 || extensionDays == 3 || extensionDays == 7) {
+          break;
+        } else {
+          System.out.println("Invalid extension period. Please enter 1, 3, or 7.");
+        }
+      } else {
+        System.out.println("Invalid input! Please enter a valid number.");
+        scanner.nextLine(); // Clear invalid input
+      }
+    }
+
+    // Determine the price of the extension
+    double extensionCost = (extensionDays == 1) ? 20 : (extensionDays == 3) ? 40 : 60;
+    System.out.printf("The price for extension period of %d days is P%.2f\n", extensionDays, extensionCost);
+
+    // Process payment
+    Payment payment = new Payment();
+    if (!payment.paymentMethod(extensionCost)) {
+      System.out.println("Payment Failed. Transaction Aborted.");
+      return;
+    }
+
+    // Fetch ticket and update expiry date
+    dbConnect.connectToMachineDatabase();
+    String query = "SELECT * FROM tickets WHERE ticketID = ?;";
+    Connection con = null;
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
+      prep.setInt(1, ticketNum);
+      result = prep.executeQuery();
+      if (result.next()) {
+        LocalDate expiryDate = LocalDate.parse(result.getString("expiryDate"), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(java.sql.Date.valueOf(expiryDate));
+        cal.add(Calendar.DATE, extensionDays);
+        Date newExpiryDate = cal.getTime();
+
+        String updateQuery = "UPDATE tickets SET expiryDate = ? WHERE ticketID = ?";
+        try (PreparedStatement updatePrep = con.prepareStatement(updateQuery)) {
+          updatePrep.setDate(1, new java.sql.Date(newExpiryDate.getTime()));
+          updatePrep.setInt(2, ticketNum);
+          updatePrep.executeUpdate();
+          System.out.println("Ticket validity extended successfully!");
+          disp.displayTicketInfo(ticketNum);
+          System.out.println("\n");
+        }
+      }
+    } catch (Exception e) {
+      System.out.println("Something went wrong with extending ticket validity");
+      e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, result);
+    }
   }
 
   public static void main(String[] args) {
