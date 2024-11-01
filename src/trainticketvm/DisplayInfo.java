@@ -1,6 +1,8 @@
 package trainticketvm;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class DisplayInfo {
 
@@ -96,4 +98,31 @@ public class DisplayInfo {
     return "Error!";
   }
 
+  public void displayTicketInfo(int ticketNum) {
+
+    dbConnect.connectToMachineDatabase();
+    String query = "SELECT * FROM tickets WHERE ticketID = ?;";
+    Connection con = null;
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
+      prep.setInt(1, ticketNum);
+      result = prep.executeQuery();
+      if (result.next()) {
+        System.out.println();
+        System.out.println("********** Ticket **********");
+        System.out.println("Ticket ID No  :  " + result.getInt("ticketID"));
+        System.out.println("Issue Date    :  " + result.getString("issueDate"));
+        System.out.println("Expiry Date   :  " + result.getString("expiryDate"));
+        System.out.println("****************************");
+      }
+    } catch (Exception e) {
+      System.out.println("Something went wrong with getting ticket information");
+      e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, result);
+    }
+  }
 }
