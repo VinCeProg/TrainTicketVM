@@ -21,4 +21,15 @@ public class SysConnectMySQL {
       ex.printStackTrace();
     }
   }
+  
+  public void closeResources(Connection con, Statement state, ResultSet result) {
+    try {
+        if (result != null) result.close();
+        if (state != null) state.close();
+        if (con != null) con.close();
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+}
+
 }
