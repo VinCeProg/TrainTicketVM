@@ -76,7 +76,7 @@ public class Ticket {
     } catch (Exception e) {
       System.out.println("Something went wrong with getting ticket information");
       e.printStackTrace();
-    }
+    } 
   }
 
   public String getTicketType() {
