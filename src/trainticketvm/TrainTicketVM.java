@@ -99,10 +99,18 @@ public class TrainTicketVM {
     System.out.printf(formatAmt, ticketAmount);
     System.out.println();
 
+    // Get number of tickets
+    int numOfTickets = getNumberOfTickets();
+    double totalAmount = ticketAmount * numOfTickets;
+    System.out.print("Total Price for " + numOfTickets + " ticket(s) is P");
+    System.out.printf(formatAmt, totalAmount);
+    System.out.println();
+
     if (confirmTransaction()) {
-      // if payment is successful, ticket is generated and uploaded to database
-      if (payment.paymentMethod(ticketAmount)) {
-        Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
+      if (payment.paymentMethod(totalAmount)) {
+        for (int i = 0; i < numOfTickets; i++) {
+          Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
+        }
         System.out.println("\nThank You & have a safe trip!");
       }
     }
@@ -110,9 +118,7 @@ public class TrainTicketVM {
   }
 
   private void validateTicket() {
-
     int ticketNum = 0;
-
     while (true) {
       System.out.print("Enter Ticket Number : ");
       if (scanner.hasNextInt()) {
@@ -127,13 +133,16 @@ public class TrainTicketVM {
         scanner.nextLine();
       }
     }
-
     dbConnect.connectToMachineDatabase();
     String query = "SELECT * FROM tickets WHERE ticketID = ?;";
-    try (Connection con = dbConnect.con;
-            PreparedStatement prep = con.prepareStatement(query)) {
+    Connection con = null;
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
       prep.setInt(1, ticketNum);
-      ResultSet result = prep.executeQuery();
+      result = prep.executeQuery();
       if (result.next()) {
         System.out.println();
         System.out.println("********** Ticket **********");
@@ -141,12 +150,9 @@ public class TrainTicketVM {
         System.out.println("Issue Date    :  " + result.getString("issueDate"));
         System.out.println("Expiry Date   :  " + result.getString("expiryDate"));
         System.out.println("****************************");
-
-        // Check if the ticket is valid
         LocalDate today = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate expiryDate = LocalDate.parse(result.getString("expiryDate"), formatter);
-
         if (today.isBefore(expiryDate) || today.isEqual(expiryDate)) {
           System.out.println("Your ticket is valid!");
         } else {
@@ -158,6 +164,8 @@ public class TrainTicketVM {
     } catch (Exception e) {
       System.out.println("Something went wrong with getting ticket information");
       e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, result);
     }
   }
 
@@ -218,6 +226,18 @@ public class TrainTicketVM {
       System.out.println("Transaction Cancelled!");
       return false;
     }
+  }
+
+  private int getNumberOfTickets() {
+    System.out.print("Enter number of tickets: ");
+    int numOfTickets = 1;
+    if (scanner.hasNextInt()) {
+      numOfTickets = scanner.nextInt();
+    } else {
+      System.out.println("Invalid input! Defaulting to 1 ticket.");
+      scanner.nextLine(); // clear invalid input
+    }
+    return numOfTickets;
   }
 
   public static void main(String[] args) {
