@@ -20,12 +20,12 @@ public class TrainTicketVM {
   private static final int TICKET_VALIDITY = 1;
 
   private void landingPage() {
-    int choice = 0;
+    int choice = -1;
 
     System.out.println("Train Ticket Vending Machine\n");
     System.out.println("Select Options:");
     System.out.println("1 - Buy Ticket/s");
-    System.out.println("2 - Check Ticket Validity (Extend)");
+    System.out.println("2 - Check Ticket Validity / Extend Validity");
     System.out.print("Choice : ");
     if (scanner.hasNextInt()) {
       choice = scanner.nextInt();
