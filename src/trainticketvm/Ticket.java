@@ -13,23 +13,21 @@ public class Ticket {
   private int departureID;
   private int destinationID;
   private double amount;
-  private String paymentMethod;
 
-  public Ticket(String ticketType, Date issueDate, Date expiryDate, int departureID, int destinationID, double amount, String paymentMethod) {
+  public Ticket(String ticketType, Date issueDate, Date expiryDate, int departureID, int destinationID, double amount) {
     this.ticketType = ticketType;
     this.issueDate = issueDate;
     this.expiryDate = expiryDate;
     this.departureID = departureID;
     this.destinationID = destinationID;
     this.amount = amount;
-    this.paymentMethod = paymentMethod;
     insertTicket();
     displayTicket();
   }
 
   public void insertTicket() {
     dbConnect.connectToMachineDatabase();
-    String query = "INSERT INTO tickets (ticketType, issueDate, expiryDate, departureID, destinationID, amount, paymentMethod) VALUES(?, ?, ?, ?, ?, ?, ?)";
+    String query = "INSERT INTO tickets (ticketType, issueDate, expiryDate, departureID, destinationID, amount) VALUES(?, ?, ?, ?, ?, ?)";
     Connection con = null;
     PreparedStatement prep = null;
     try {
@@ -41,7 +39,6 @@ public class Ticket {
         prep.setInt(4, departureID);
         prep.setInt(5, destinationID);
         prep.setDouble(6, amount);
-        prep.setString(7, paymentMethod);
         prep.executeUpdate();
     } catch (Exception e) {
         System.out.println("Something went wrong with inserting ticket into database!");
