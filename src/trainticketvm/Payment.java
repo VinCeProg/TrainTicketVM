@@ -1,13 +1,22 @@
 package trainticketvm;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.util.Scanner;
 import java.util.InputMismatchException;
+import java.util.Date;
 
 public class Payment {
-  
+
+  private Date paymentDate;
+  private double amount;
+  private String paymentMethod;
+  private String description;
+
   private Scanner scanner = new Scanner(System.in);
-  
-  public boolean paymentMethod(double ticketAmount){
+  private static SysConnectMySQL dbConnect = new SysConnectMySQL();
+
+  public boolean paymentMethod(double ticketAmount) {
     String paymentMethod = "";
     while (true) {
       System.out.print("Choose payment method (CASH, CARD, or MOBILE): ");
@@ -15,9 +24,11 @@ public class Payment {
 
       switch (paymentMethod) {
         case "CASH":
+          this.paymentMethod = paymentMethod;
           return makeCashPayment(ticketAmount);
         case "CARD":
         case "MOBILE":
+          this.paymentMethod = paymentMethod;
           return makeCashlessPayment(ticketAmount, paymentMethod);
         default:
           System.out.println("Invalid Payment Method!");
@@ -25,7 +36,28 @@ public class Payment {
       }
     }
   }
-  
+
+  public void insertPaymentToDB() {
+    dbConnect.connectToMachineDatabase();
+    String query = "INSERT INTO payments (payment_date, amount, payment_description, payment_method) VALUES(?, ?, ?, ?)";
+    Connection con = null;
+    PreparedStatement prep = null;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
+      prep.setDate(1, new java.sql.Date(getPaymentDate().getTime()));
+      prep.setDouble(2, getAmount());
+      prep.setString(3, getDescription());
+      prep.setString(4, getPaymentMethod());
+      prep.executeUpdate();
+    } catch (Exception e) {
+      System.out.println("Something went wrong with inserting payment into database!");
+      e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, null);
+    }
+  }
+
   public boolean makeCashPayment(double amount) {
 
     double totalInserted = 0;
@@ -87,5 +119,37 @@ public class Payment {
       e.printStackTrace();
       return false;
     }
+  }
+
+  public Date getPaymentDate() {
+    return paymentDate;
+  }
+
+  public void setPaymentDate(Date paymentDate) {
+    this.paymentDate = paymentDate;
+  }
+
+  public double getAmount() {
+    return amount;
+  }
+
+  public void setAmount(double amount) {
+    this.amount = amount;
+  }
+
+  public String getPaymentMethod() {
+    return paymentMethod;
+  }
+
+  public void setPaymentMethod(String paymentMethod) {
+    this.paymentMethod = paymentMethod;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public void setDescription(String description) {
+    this.description = description;
   }
 }
