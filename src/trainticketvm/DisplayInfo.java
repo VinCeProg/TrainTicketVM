@@ -1,8 +1,6 @@
 package trainticketvm;
 
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 public class DisplayInfo {
 
