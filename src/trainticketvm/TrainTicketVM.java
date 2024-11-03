@@ -111,9 +111,10 @@ public class TrainTicketVM {
         for (int i = 0; i < numOfTickets; i++) {
           Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount);
         }
-        String description = "Purchased " + numOfTickets + " " + ticketType.toUpperCase() + " tickets (" + departure + "-" + destination + ")";
+        String description = "Purchased " + numOfTickets + " " + ticketType.toUpperCase() + " ticket(s) (" + departure + "-" + destination + ")";
         payment.setAmount(totalAmount);
         payment.setDescription(description);
+        payment.setTransactionType("BUY");
         payment.insertPaymentToDB();
         System.out.println("\nThank You & have a safe trip!");
       }
@@ -304,6 +305,7 @@ public class TrainTicketVM {
     String description = "Extended ticket #" + ticketNum + " for " + extensionDays + " days";
     payment.setAmount(extensionCost);
     payment.setDescription(description);
+    payment.setTransactionType("EXT");
     payment.insertPaymentToDB();
 
     // Fetch ticket and update expiry date

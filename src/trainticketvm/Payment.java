@@ -11,6 +11,7 @@ public class Payment {
   private double amount;
   private String paymentMethod;
   private String description;
+  private String transactionType;
 
   private Scanner scanner = new Scanner(System.in);
   private static SysConnectMySQL dbConnect = new SysConnectMySQL();
@@ -38,15 +39,16 @@ public class Payment {
 
   public void insertPaymentToDB() {
     dbConnect.connectToMachineDatabase();
-    String query = "INSERT INTO payments (amount, payment_description, payment_method) VALUES(?, ?, ?)";
+    String query = "INSERT INTO payments (amount, payment_description, payment_method, transaction_type) VALUES(?, ?, ?, ?)";
     Connection con = null;
     PreparedStatement prep = null;
     try {
       con = dbConnect.con;
       prep = con.prepareStatement(query);
-      prep.setDouble(2, getAmount());
-      prep.setString(3, getDescription());
-      prep.setString(4, getPaymentMethod());
+      prep.setDouble(1, getAmount());
+      prep.setString(2, getDescription());
+      prep.setString(3, getPaymentMethod());
+      prep.setString(4, getTransactionType());
       prep.executeUpdate();
     } catch (Exception e) {
       System.out.println("Something went wrong with inserting payment into database!");
@@ -141,5 +143,13 @@ public class Payment {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getTransactionType() {
+    return transactionType;
+  }
+
+  public void setTransactionType(String transactionType) {
+    this.transactionType = transactionType;
   }
 }
