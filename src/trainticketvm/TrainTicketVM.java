@@ -109,8 +109,13 @@ public class TrainTicketVM {
       Payment payment = new Payment();
       if (payment.paymentMethod(totalAmount)) {
         for (int i = 0; i < numOfTickets; i++) {
-          Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount, paymentMethod);
+          Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount);
         }
+        String description = "Purchased " + numOfTickets + " " + ticketType.toUpperCase() + " tickets (" + departure + "-" + destination + ")";
+        payment.setPaymentDate(issueDate);
+        payment.setAmount(totalAmount);
+        payment.setDescription(description);
+        payment.insertPaymentToDB();
         System.out.println("\nThank You & have a safe trip!");
       }
     }
@@ -295,6 +300,13 @@ public class TrainTicketVM {
       System.out.println("Payment Failed. Transaction Aborted.");
       return;
     }
+    
+    Date paymentDate = new Date();
+    String description = "Extended ticket #" + ticketNum + " for " + extensionDays + " days";
+    payment.setPaymentDate(paymentDate);
+    payment.setAmount(extensionCost);
+    payment.setDescription(description);
+    payment.insertPaymentToDB();
 
     // Fetch ticket and update expiry date
     dbConnect.connectToMachineDatabase();
