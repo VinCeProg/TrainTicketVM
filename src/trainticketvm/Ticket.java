@@ -78,28 +78,4 @@ public class Ticket {
       e.printStackTrace();
     } 
   }
-
-  public String getTicketType() {
-    return ticketType;
-  }
-
-  public void setTicketType(String ticketType) {
-    this.ticketType = ticketType;
-  }
-
-  public Date getIssueDate() {
-    return issueDate;
-  }
-
-  public void setIssueDate(Date issueDate) {
-    this.issueDate = issueDate;
-  }
-
-  public Date getExpiryDate() {
-    return expiryDate;
-  }
-
-  public void setExpiryDate(Date expiryDate) {
-    this.expiryDate = expiryDate;
-  }
 }
