@@ -112,7 +112,6 @@ public class TrainTicketVM {
           Ticket ticket = new Ticket(ticketType.toUpperCase(), issueDate, expiryDate, departure, destination, ticketAmount);
         }
         String description = "Purchased " + numOfTickets + " " + ticketType.toUpperCase() + " tickets (" + departure + "-" + destination + ")";
-        payment.setPaymentDate(issueDate);
         payment.setAmount(totalAmount);
         payment.setDescription(description);
         payment.insertPaymentToDB();
@@ -303,7 +302,6 @@ public class TrainTicketVM {
     
     Date paymentDate = new Date();
     String description = "Extended ticket #" + ticketNum + " for " + extensionDays + " days";
-    payment.setPaymentDate(paymentDate);
     payment.setAmount(extensionCost);
     payment.setDescription(description);
     payment.insertPaymentToDB();

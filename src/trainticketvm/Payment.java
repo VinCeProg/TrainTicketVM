@@ -8,7 +8,6 @@ import java.util.Date;
 
 public class Payment {
 
-  private Date paymentDate;
   private double amount;
   private String paymentMethod;
   private String description;
@@ -39,13 +38,12 @@ public class Payment {
 
   public void insertPaymentToDB() {
     dbConnect.connectToMachineDatabase();
-    String query = "INSERT INTO payments (payment_date, amount, payment_description, payment_method) VALUES(?, ?, ?, ?)";
+    String query = "INSERT INTO payments (amount, payment_description, payment_method) VALUES(?, ?, ?)";
     Connection con = null;
     PreparedStatement prep = null;
     try {
       con = dbConnect.con;
       prep = con.prepareStatement(query);
-      prep.setDate(1, new java.sql.Date(getPaymentDate().getTime()));
       prep.setDouble(2, getAmount());
       prep.setString(3, getDescription());
       prep.setString(4, getPaymentMethod());
@@ -119,14 +117,6 @@ public class Payment {
       e.printStackTrace();
       return false;
     }
-  }
-
-  public Date getPaymentDate() {
-    return paymentDate;
-  }
-
-  public void setPaymentDate(Date paymentDate) {
-    this.paymentDate = paymentDate;
   }
 
   public double getAmount() {
