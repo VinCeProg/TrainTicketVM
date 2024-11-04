@@ -303,7 +303,7 @@ public class TrainTicketVM {
     
     // inserts the payment to db
     Date paymentDate = new Date();
-    String description = "Extended ticket #" + ticketNum + " for " + extensionDays + " days";
+    String description = "Extended ticket #" + ticketNum + " for " + extensionDays + " day(s)";
     payment.setAmount(extensionCost);
     payment.setDescription(description);
     payment.setTransactionType("EXT");
