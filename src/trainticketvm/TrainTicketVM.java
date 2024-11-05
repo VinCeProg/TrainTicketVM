@@ -364,7 +364,6 @@ public class TrainTicketVM {
       switch (choice) {
         case 1: // Views Expired Tickets
           viewExpiredTickets();
-          System.out.println();
           break;
         case 2: // Deletes Expired Tickets
           if (confirmTransaction()) {
@@ -407,7 +406,7 @@ public class TrainTicketVM {
       }
 
       if (tixCount > 0) {
-        System.out.println(tixCount + "ticket(s) found!");
+        System.out.println ("\n" + tixCount + " ticket(s) found!");
       }else{
         System.out.println("No Expired Tickets Found!");
       }
@@ -419,14 +418,16 @@ public class TrainTicketVM {
     }
   }
   
-  private void logInAdmin(){
+  private boolean logInAdmin(){
     scanner.nextLine();
     System.out.print("Enter Password : ");
     if(verifyPassword(scanner.nextLine())){
       accessControl();
+      return true;
     }else{
       System.out.println("Password Incorrect! Returning to Main Menu.");
-    }
+    } 
+    return false;
   }
   
   private boolean verifyPassword(String password){
