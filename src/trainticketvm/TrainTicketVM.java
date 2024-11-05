@@ -35,8 +35,8 @@ public class TrainTicketVM {
     }
 
     switch (choice) {
-      case 0: // exit NOTE: this will be transferred in Admin Access later
-        mainLoop = false;
+      case 0: // Admin Controls 
+        accessControl();
         break;
       case 1: // Buy Ticket
         buyTicket();
@@ -300,7 +300,7 @@ public class TrainTicketVM {
       System.out.println("Payment Failed. Transaction Aborted.");
       return;
     }
-    
+
     // inserts the payment to db
     Date paymentDate = new Date();
     String description = "Extended ticket #" + ticketNum + " for " + extensionDays + " day(s)";
@@ -342,6 +342,101 @@ public class TrainTicketVM {
       e.printStackTrace();
     } finally {
       dbConnect.closeResources(con, prep, result);
+    }
+  }
+
+  private void accessControl() {
+    int choice = 0;
+    while (true) {
+
+      System.out.println("\n\nMaintenance");
+      System.out.println("Select Options:");
+      System.out.println("1 - View Expired Tickets");
+      System.out.println("2 - Delete Expired Tickets");
+      System.out.println("3 - Shutdown");
+      System.out.println("4 - Exit Maintenance");
+      System.out.print("Choice : ");
+      if (scanner.hasNextInt()) {
+        choice = scanner.nextInt();
+      } else {
+        System.out.println("Please enter a valid Input!");
+        scanner.nextLine();
+      }
+
+      switch (choice) {
+        case 1: // Views Expired Tickets
+          viewExpiredTickets();
+          System.out.println();
+          break;
+        case 2: // Deletes Expired Tickets
+          if (confirmTransaction()) {
+            deleteExpiredTickets();
+          }
+          System.out.println();
+          break;
+        case 3: // Shutdown
+          mainLoop = false;
+          return;
+        case 4:
+          return;
+        default:
+          System.out.println("Invalid input! Please select a valid option!");
+          scanner.nextLine();
+          break;
+      }//switch
+    }
+  }
+
+  private void viewExpiredTickets() {
+    dbConnect.connectToMachineDatabase();
+    String query = "SELECT * FROM tickets WHERE expiryDate < CURRENT_DATE";
+    Connection con = null;
+    PreparedStatement prep = null;
+    ResultSet result = null;
+    int tixCount = 0;
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(query);
+      result = prep.executeQuery();
+      System.out.println("--------------------------------");
+      System.out.println("Ticket No. \t Expiry Date");
+      System.out.println("--------------------------------");
+      while (result.next()) {
+        int ticketNum = result.getInt("ticketID");
+        String expiryDate = result.getString("expiryDate");
+        System.out.println(ticketNum + "\t " + expiryDate);
+        tixCount++;
+      }
+
+      if (tixCount > 0) {
+        System.out.println(tixCount + "ticket(s) found!");
+      }else{
+        System.out.println("No Expired Tickets Found!");
+      }
+    } catch (Exception e) {
+      System.out.println("Something went wrong with viewing expired tickets.");
+      e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, result);
+    }
+  }
+
+  private void deleteExpiredTickets() {
+    dbConnect.connectToMachineDatabase();
+    String deleteQuery = "DELETE FROM tickets WHERE expiryDate < CURRENT_DATE";
+    Connection con = null;
+    PreparedStatement prep = null;
+
+    try {
+      con = dbConnect.con;
+      prep = con.prepareStatement(deleteQuery);
+      int rowsDeleted = prep.executeUpdate();
+      System.out.println("Total Expired Tickets Deleted: " + rowsDeleted);
+    } catch (Exception e) {
+      System.out.println("Something went wrong with deleting expired tickets.");
+      e.printStackTrace();
+    } finally {
+      dbConnect.closeResources(con, prep, null);
     }
   }
 
