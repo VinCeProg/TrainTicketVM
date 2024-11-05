@@ -36,7 +36,7 @@ public class TrainTicketVM {
 
     switch (choice) {
       case 0: // Admin Controls 
-        accessControl();
+        logInAdmin();
         break;
       case 1: // Buy Ticket
         buyTicket();
@@ -56,8 +56,6 @@ public class TrainTicketVM {
     String ticketType = "";
     int departure = 0;
     int destination = 0;
-    boolean paymentSuccessful = false;
-    String paymentMethod = "";
 
     // Asks the user to choose ticket Type
     ticketType = selectTicketType();
@@ -420,7 +418,25 @@ public class TrainTicketVM {
       dbConnect.closeResources(con, prep, result);
     }
   }
-
+  
+  private void logInAdmin(){
+    scanner.nextLine();
+    System.out.print("Enter Password : ");
+    if(verifyPassword(scanner.nextLine())){
+      accessControl();
+    }else{
+      System.out.println("Password Incorrect! Returning to Main Menu.");
+    }
+  }
+  
+  private boolean verifyPassword(String password){
+    final String adminPassword = "Java@2024";
+    if(password.equals(adminPassword)){
+      return true;
+    }
+    return false;
+  }
+  
   private void deleteExpiredTickets() {
     dbConnect.connectToMachineDatabase();
     String deleteQuery = "DELETE FROM tickets WHERE expiryDate < CURRENT_DATE";
