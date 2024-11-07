@@ -348,6 +348,26 @@ public class TrainTicketVM {
     }
   }
 
+    private boolean logInAdmin() {
+    scanner.nextLine();
+    System.out.print("Enter Password : ");
+    if (verifyPassword(scanner.nextLine())) {
+      accessControl();
+      return true;
+    } else {
+      System.out.println("Password Incorrect! Returning to Main Menu.");
+    }
+    return false;
+  }
+
+  private boolean verifyPassword(String password) {
+    final String adminPassword = "Java@2024";
+    if (password.equals(adminPassword)) {
+      return true;
+    }
+    return false;
+  }
+  
   private void accessControl() {
     int choice = 0;
     while (true) {
@@ -425,26 +445,6 @@ public class TrainTicketVM {
     } finally {
       dbConnect.closeResources(con, prep, result);
     }
-  }
-
-  private boolean logInAdmin() {
-    scanner.nextLine();
-    System.out.print("Enter Password : ");
-    if (verifyPassword(scanner.nextLine())) {
-      accessControl();
-      return true;
-    } else {
-      System.out.println("Password Incorrect! Returning to Main Menu.");
-    }
-    return false;
-  }
-
-  private boolean verifyPassword(String password) {
-    final String adminPassword = "Java@2024";
-    if (password.equals(adminPassword)) {
-      return true;
-    }
-    return false;
   }
 
   private void deleteExpiredTickets() {
