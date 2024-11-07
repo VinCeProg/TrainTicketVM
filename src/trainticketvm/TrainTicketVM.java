@@ -194,7 +194,7 @@ public class TrainTicketVM {
     return numOfTickets;
   }
 
-  private int selectTicketNum(){
+  private int selectTicketNum() {
     int ticketNum;
     while (true) {
       System.out.print("Enter Ticket Number : ");
@@ -213,10 +213,10 @@ public class TrainTicketVM {
       return 0;
     }
   }
-  
+
   private void validateTicket() {
     int ticketNum = selectTicketNum();
-    
+
     dbConnect.connectToMachineDatabase();
     String query = "SELECT * FROM tickets WHERE ticketID = ?;";
     Connection con = null;
@@ -356,8 +356,9 @@ public class TrainTicketVM {
       System.out.println("Select Options:");
       System.out.println("1 - View Expired Tickets");
       System.out.println("2 - Delete Expired Tickets");
-      System.out.println("3 - Shutdown");
-      System.out.println("4 - Exit Maintenance");
+      System.out.println("3 - Delete a ticket");
+      System.out.println("4 - Shutdown");
+      System.out.println("5 - Exit Maintenance");
       System.out.print("Choice : ");
       if (scanner.hasNextInt()) {
         choice = scanner.nextInt();
@@ -376,10 +377,13 @@ public class TrainTicketVM {
           }
           System.out.println();
           break;
-        case 3: // Shutdown
+        case 3:
+          deleteTicket();
+          break;
+        case 4: // Shutdown
           mainLoop = false;
           return;
-        case 4:
+        case 5:
           return;
         default:
           System.out.println("Invalid input! Please select a valid option!");
@@ -411,8 +415,8 @@ public class TrainTicketVM {
       }
 
       if (tixCount > 0) {
-        System.out.println ("\n" + tixCount + " ticket(s) found!");
-      }else{
+        System.out.println("\n" + tixCount + " ticket(s) found!");
+      } else {
         System.out.println("No Expired Tickets Found!");
       }
     } catch (Exception e) {
@@ -422,27 +426,27 @@ public class TrainTicketVM {
       dbConnect.closeResources(con, prep, result);
     }
   }
-  
-  private boolean logInAdmin(){
+
+  private boolean logInAdmin() {
     scanner.nextLine();
     System.out.print("Enter Password : ");
-    if(verifyPassword(scanner.nextLine())){
+    if (verifyPassword(scanner.nextLine())) {
       accessControl();
       return true;
-    }else{
+    } else {
       System.out.println("Password Incorrect! Returning to Main Menu.");
-    } 
+    }
     return false;
   }
-  
-  private boolean verifyPassword(String password){
+
+  private boolean verifyPassword(String password) {
     final String adminPassword = "Java@2024";
-    if(password.equals(adminPassword)){
+    if (password.equals(adminPassword)) {
       return true;
     }
     return false;
   }
-  
+
   private void deleteExpiredTickets() {
     dbConnect.connectToMachineDatabase();
     String deleteQuery = "DELETE FROM tickets WHERE expiryDate < CURRENT_DATE";
@@ -459,6 +463,32 @@ public class TrainTicketVM {
       e.printStackTrace();
     } finally {
       dbConnect.closeResources(con, prep, null);
+    }
+  }
+
+  private void deleteTicket() {
+    int ticketNum = selectTicketNum();
+    disp.displayTicketInfo(ticketNum);
+
+    System.out.println("Do you really want to delete this ticket?");
+    if (confirmTransaction()) {
+      dbConnect.connectToMachineDatabase();
+      String deleteQuery = "DELETE FROM tickets WHERE ticketID = ?";
+      Connection con = null;
+      PreparedStatement prep = null;
+
+      try {
+        con = dbConnect.con;
+        prep = con.prepareStatement(deleteQuery);
+        prep.setInt(1, ticketNum);
+        int rowsDeleted = prep.executeUpdate();
+        System.out.println("Ticket No. " + ticketNum + " successfully deleted");
+      } catch (Exception e) {
+        System.out.println("Something went wrong with deleting the ticket.");
+        e.printStackTrace();
+      } finally {
+        dbConnect.closeResources(con, prep, null);
+      }
     }
   }
 
