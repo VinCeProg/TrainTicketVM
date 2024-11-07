@@ -448,6 +448,10 @@ public class TrainTicketVM {
   }
 
   private void deleteExpiredTickets() {
+    if(!logInAdmin()){
+      return;
+    }
+    
     dbConnect.connectToMachineDatabase();
     String deleteQuery = "DELETE FROM tickets WHERE expiryDate < CURRENT_DATE";
     Connection con = null;
@@ -467,6 +471,10 @@ public class TrainTicketVM {
   }
 
   private void deleteTicket() {
+    if(!logInAdmin()){
+      return;
+    }
+    
     int ticketNum = selectTicketNum();
     disp.displayTicketInfo(ticketNum);
 
