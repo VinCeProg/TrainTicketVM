@@ -115,6 +115,8 @@ public class DisplayInfo {
         System.out.println("Issue Date    :  " + result.getString("issueDate"));
         System.out.println("Expiry Date   :  " + result.getString("expiryDate"));
         System.out.println("****************************");
+      }else{
+        System.out.println("No Ticket Found!");
       }
     } catch (Exception e) {
       System.out.println("Something went wrong with getting ticket information");
