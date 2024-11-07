@@ -36,7 +36,7 @@ public class TrainTicketVM {
 
     switch (choice) {
       case 0: // Admin Controls 
-        logInAdmin();
+        accessControl();
         break;
       case 1: // Buy Ticket
         buyTicket();
@@ -352,7 +352,6 @@ public class TrainTicketVM {
     scanner.nextLine();
     System.out.print("Enter Password : ");
     if (verifyPassword(scanner.nextLine())) {
-      accessControl();
       return true;
     } else {
       System.out.println("Password Incorrect! Returning to Main Menu.");
@@ -369,6 +368,10 @@ public class TrainTicketVM {
   }
   
   private void accessControl() {
+    if(!logInAdmin()){
+      return;
+    }
+    
     int choice = 0;
     while (true) {
 
