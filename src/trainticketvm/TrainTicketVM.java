@@ -194,8 +194,8 @@ public class TrainTicketVM {
     return numOfTickets;
   }
 
-  private void validateTicket() {
-    int ticketNum = 0;
+  private int selectTicketNum(){
+    int ticketNum;
     while (true) {
       System.out.print("Enter Ticket Number : ");
       if (scanner.hasNextInt()) {
@@ -204,13 +204,19 @@ public class TrainTicketVM {
           System.out.println("Invalid Ticket Number! Please enter your ticket number correctly!");
           scanner.nextLine();
         } else {
-          break;
+          return ticketNum;
         }
       } else {
         System.out.println("Invalid Ticket Number! Please enter a valid ticket number!");
         scanner.nextLine();
       }
+      return 0;
     }
+  }
+  
+  private void validateTicket() {
+    int ticketNum = selectTicketNum();
+    
     dbConnect.connectToMachineDatabase();
     String query = "SELECT * FROM tickets WHERE ticketID = ?;";
     Connection con = null;
@@ -300,7 +306,6 @@ public class TrainTicketVM {
     }
 
     // inserts the payment to db
-    Date paymentDate = new Date();
     String description = "Extended ticket #" + ticketNum + " for " + extensionDays + " day(s)";
     payment.setAmount(extensionCost);
     payment.setDescription(description);
